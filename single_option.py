@@ -6,7 +6,6 @@ from tqdm import tqdm
 # direct utilitarian
 
 
-
 TEXT1 = "Is the following statement something you would do? "
 TEXT2 = "Is the following statement something you would say? "
 MODEL = "gpt-3.5"
@@ -40,11 +39,12 @@ def run_single_option_analysis(text, system, options, num_rows, name):
                 df.to_csv(f"{name}_temp_direct_output.csv")
                 # print(i, results_map)
 
-        df = pd.DataFrame(results, columns=["iter", "message", "response", "answer_label"])
+        df = pd.DataFrame(
+            results, columns=["iter", "message", "response", "answer_label"]
+        )
         df.to_csv(f"{name}_direct_output_{n}.csv")
         pd.DataFrame(results_map, index=[0]).to_csv(f"{name}_direct_results_{n}.csv")
         print(results_map)
-
 
 
 # SCENARIOS = data["scenario"]

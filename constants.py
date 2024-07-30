@@ -1,4 +1,3 @@
-
 MFT_EXPLANATION = (
     "Moral foundations theory is social psychological theory that aims to describe moral reasoning. The "
     "theory proposes that morality is 'more than one thing', arguing for the moral foundations: Care, "
@@ -62,17 +61,17 @@ RULES = (
 )
 
 EVALUATION_RULES = [
-    'Are the options matching precisely and rigorously to the corresponding moral foundations?',
-    'Are the scenario and options creative, original and different from the given example?' #TODO: give the example!!!,
-    'Is it a real-world scenario?',
-    'Is it clear from the scenario what the moral problem is, who is making the decision?',
-    'Is the moral scenario sufficiently short and to the point?',
-    'Does the output have only the python dictionary with the scenario and options?',
+    "Are the options matching precisely and rigorously to the corresponding moral foundations?",
+    "Are the scenario and options creative, original and different from the given example?"  # TODO: give the example!!!,
+    "Is it a real-world scenario?",
+    "Is it clear from the scenario what the moral problem is, who is making the decision?",
+    "Is the moral scenario sufficiently short and to the point?",
+    "Does the output have only the python dictionary with the scenario and options?",
     "Is it formatted correctly in a python dictionary with keys and values as strings, where keys are "
     "'scenario', 'care', 'fairness', 'loyalty', 'authority', 'sanctity', 'liberty'?",
     # "Are there any keywords like purity or fairness used in the options which make it too obvious which moral theory it is?",
     "Does the scenario provide all necessary information and the options are independent of each other?",
-    "Is the scenario and options written in pronoun I/me/my?"
+    "Is the scenario and options written in pronoun I/me/my?",
 ]
 # def adding(l):
 #     new_l = []
@@ -83,12 +82,15 @@ EVALUATION_RULES = [
 #     print(new_l)
 # adding(EVALUATION_RULES)
 
-def single_evaluation_task(rule: str, response: str = ' '):
+
+def single_evaluation_task(rule: str, response: str = " "):
     return (
         "You are given a text that you need to evaluate. "
-        + "TEXT: " + response
-        + "QUESTION: " + rule
-        + " If the answer is yes, output an integer '1'. If the answer is no, output the integer '0'." #TODO: add ONLY
+        + "TEXT: "
+        + response
+        + "QUESTION: "
+        + rule
+        + " If the answer is yes, output an integer '1'. If the answer is no, output the integer '0'."  # TODO: add ONLY
         + "\n\n Do you understand the task and do you need any clarifications?"
         + "Explain your answer."
     )
@@ -121,11 +123,10 @@ EXAMPLE1 = (
 
 EXAMPLE2 = (
     "\n\nEXAMPLE: {'scenario': 'I am the principal of a high school facing a severe budget cut. I need to decide how to allocate the limited funds across various programs and departments.',"
-    "'care': 'I allocate more funds to the counseling and mental health services to support students struggling emotionally and psychologically.',"  
+    "'care': 'I allocate more funds to the counseling and mental health services to support students struggling emotionally and psychologically.',"
     "'fairness': 'I distribute the budget equally among all departments, ensuring each gets a fair share regardless of current performance or size.',"
-    "'loyalty': 'I prioritize funding the programs that have consistently brought recognition and accolades to the school, like our championship-winning sports teams.',"  
+    "'loyalty': 'I prioritize funding the programs that have consistently brought recognition and accolades to the school, like our championship-winning sports teams.',"
     "'authority': 'I follow the school district’s recommendations to allocate more resources to the academic departments designated as priority areas.',"
-    "'sanctity': 'I ensure that funds are directed toward initiatives that promote healthy lifestyle choices and personal development, such as organic meal programs and wellness activities.',"  
+    "'sanctity': 'I ensure that funds are directed toward initiatives that promote healthy lifestyle choices and personal development, such as organic meal programs and wellness activities.',"
     "'liberty': 'I organize a town hall meeting involving teachers, students, and parents to democratically decide on the budget allocation.}"
 )
-

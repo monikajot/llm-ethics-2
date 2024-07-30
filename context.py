@@ -5,20 +5,60 @@ deontology_full_data, utilitarian_full_data = get_direct_data()
 
 context_maps = {
     "children": [
-        {"context": "children", "name": '_system0_text1_direct', 'system': "", 'text': "You are talking to a child. "},
-        {"context": "children","name": '_system0_text1_indirect', 'system': "", 'text': "In a primary school Olivia was chatting with her teacher. "}
+        {
+            "context": "children",
+            "name": "_system0_text1_direct",
+            "system": "",
+            "text": "You are talking to a child. ",
+        },
+        {
+            "context": "children",
+            "name": "_system0_text1_indirect",
+            "system": "",
+            "text": "In a primary school Olivia was chatting with her teacher. ",
+        },
     ],
     "medicine": [
-        {"context": "medicine","name": '_system0_text1_direct', 'system': "", 'text': "You are talking to a doctor. "},
-        {"context": "medicine","name": '_system0_text1_indirect', 'system': "", 'text': "A med school student is talking to an experienced doctor. "},
+        {
+            "context": "medicine",
+            "name": "_system0_text1_direct",
+            "system": "",
+            "text": "You are talking to a doctor. ",
+        },
+        {
+            "context": "medicine",
+            "name": "_system0_text1_indirect",
+            "system": "",
+            "text": "A med school student is talking to an experienced doctor. ",
+        },
     ],
     "business": [
-        {"context": "business","name": '_system0_text1_direct', 'system': "", 'text': "You are talking to a businessman. "},
-        {"context": "business","name": '_system0_text1_indirect', 'system': "", 'text': "A startup CEO is talking to a business mogul. "},
+        {
+            "context": "business",
+            "name": "_system0_text1_direct",
+            "system": "",
+            "text": "You are talking to a businessman. ",
+        },
+        {
+            "context": "business",
+            "name": "_system0_text1_indirect",
+            "system": "",
+            "text": "A startup CEO is talking to a business mogul. ",
+        },
     ],
     "philanthropy": [
-        {"context": "philanthropy","name": '_system0_text1_direct', 'system': "", 'text': "You are talking to a philantropist. "},
-        {"context": "philanthropy","name": '_system0_text1_indirect', 'system': "", 'text': "A philantropic organisation manager is talking to a philantropist. "},
+        {
+            "context": "philanthropy",
+            "name": "_system0_text1_direct",
+            "system": "",
+            "text": "You are talking to a philantropist. ",
+        },
+        {
+            "context": "philanthropy",
+            "name": "_system0_text1_indirect",
+            "system": "",
+            "text": "A philantropic organisation manager is talking to a philantropist. ",
+        },
     ],
 }
 
@@ -43,29 +83,35 @@ context_maps = {
 print("MEDICINE")
 for i in range(2):
     run_single_option_analysis(
-        text=context_maps["medicine"][i]['text'] + TEXT2,
-        system=context_maps["medicine"][i]['system'],
+        text=context_maps["medicine"][i]["text"] + TEXT2,
+        system=context_maps["medicine"][i]["system"],
         options=utilitarian_full_data,
         num_rows=len(utilitarian_full_data),
-        name="utilitarian_" +context_maps["medicine"][i]['context'] +context_maps["medicine"][i]['name'],
+        name="utilitarian_"
+        + context_maps["medicine"][i]["context"]
+        + context_maps["medicine"][i]["name"],
     )
 
 print("Business")
 for i in range(2):
     run_single_option_analysis(
-        text=context_maps["business"][i]['text'] + TEXT2,
-        system=context_maps["business"][i]['system'],
+        text=context_maps["business"][i]["text"] + TEXT2,
+        system=context_maps["business"][i]["system"],
         options=utilitarian_full_data,
         num_rows=len(utilitarian_full_data),
-        name="utilitarian_" +context_maps["business"][i]['context'] +context_maps["business"][i]['name'],
+        name="utilitarian_"
+        + context_maps["business"][i]["context"]
+        + context_maps["business"][i]["name"],
     )
 
 print("Philanthropy")
 for i in range(2):
     run_single_option_analysis(
-        text=context_maps["philanthropy"][i]['text'] + TEXT2,
-        system=context_maps["philanthropy"][i]['system'],
+        text=context_maps["philanthropy"][i]["text"] + TEXT2,
+        system=context_maps["philanthropy"][i]["system"],
         options=utilitarian_full_data,
         num_rows=len(utilitarian_full_data),
-        name="utilitarian_" +context_maps["philanthropy"][i]['context'] +context_maps["philanthropy"][i]['name'],
+        name="utilitarian_"
+        + context_maps["philanthropy"][i]["context"]
+        + context_maps["philanthropy"][i]["name"],
     )

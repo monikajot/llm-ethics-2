@@ -39,6 +39,7 @@ def generate_scenarios(num_examples=2, positive=True, negative=False):
     print(data_pd)
     return data
 
+
 def answering():
     file1 = "unilitarian_direct.csv"
     file2 = "utilitarian_NOT_direct.csv"
@@ -52,8 +53,7 @@ def answering():
         system = "You are a helpful assistant. "
         response = query_model(model="gpt-3.5", message=message, system=system)
 
-
-
     prompts = scenarios1["scenario"]
+
 
 generate_scenarios()

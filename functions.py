@@ -2,9 +2,12 @@ import pandas as pd
 import cohere
 from openai import OpenAI
 import time
+import os
+
+# print(os.environ['CO_API_KEY'])
 
 client = OpenAI()
-co = cohere.Client()
+co = cohere.Client(os.environ.get("CO_API_KEY"))
 
 
 def query_model(model, message, system):
@@ -22,8 +25,8 @@ def query_model(model, message, system):
                 model="gpt-3.5-turbo-1106",
                 messages=[
                     {"role": "system", "content": system},
-                    {"role": "user", "content": message}
-                ]
+                    {"role": "user", "content": message},
+                ],
             )
 
             # print(completion.choices[0].message)
@@ -33,9 +36,9 @@ def query_model(model, message, system):
             response = client.chat.completions.create(
                 model="gpt-4-0613",
                 messages=[
-                    {'role': 'system',
-                     'content': system},
-                    {'role': 'user', 'content': message}],
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": message},
+                ],
             )
             response = response.choices[0].message.content
 
@@ -43,21 +46,19 @@ def query_model(model, message, system):
             response = client.chat.completions.create(
                 model="gpt-4o-2024-05-13",
                 messages=[
-                    {'role': 'system',
-                     'content': system},
-                    {'role': 'user', 'content': message}],
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": message},
+                ],
             )
             response = response.choices[0].message.content
 
-        if model=="claude":
+        if model == "claude":
             message = message
             response = client.messages.create(
                 model="claude-2.1",
                 max_tokens=1024,
                 system=system,
-                messages=[
-                    {"role": "user", "content": message}
-                ]
+                messages=[{"role": "user", "content": message}],
             )
             response = response.content[0].text
             print(response)
@@ -89,13 +90,17 @@ def get_direct_data():
     ].reset_index()["statement"]
     return deon_comp_data, util_comp_data
 
+
 def generate_dataset_from_all_scenarions():
     all_indirect_scenarios = pd.read_csv("datasets/ALL_SCENARIOS.csv")
     n = len(all_indirect_scenarios)
     data = []
     for i in range(n):
         prompt = all_indirect_scenarios["prompt"][i]
-        if any(str in prompt.lower() for str in ["utilita", "deonto", "evil", "selfish", "deceitful"]):
+        if any(
+            str in prompt.lower()
+            for str in ["utilita", "deonto", "evil", "selfish", "deceitful"]
+        ):
             continue
         prompt = prompt.replace("\n", " ")
         idx = prompt.find("Option")
@@ -106,15 +111,27 @@ def generate_dataset_from_all_scenarions():
         option_1 = prompt[idx:idx2]
         option_2 = prompt[idx2:idx3]
         option_3 = prompt[idx3:]
-        if len(scenario)>15 and len(option_1)>15 and len(option_2)>15 and len(option_3)>15:
+        if (
+            len(scenario) > 15
+            and len(option_1) > 15
+            and len(option_2) > 15
+            and len(option_3) > 15
+        ):
             data.append([scenario, option_1, option_2, option_3])
     df = pd.DataFrame(data, columns=["scenario", "option_1", "option_2", "option_3"])
     N = len(df)
     df.to_csv(f"indirect_util_deon_evil_{N}.csv")
+
+
 # generate_dataset_from_all_scenarions()
-#test
-# response = query_model("gpt-3.5", "Hello! Can you help me with a maths problem", "You are a helpful assistant. ")
-# print(response)
+# test
+response = query_model(
+    "gpt-3.5",
+    "Hello! Can you help me with a maths problem",
+    "You are a helpful assistant. ",
+)
+print(response)
+
 
 def split_text_to_options(prompt):
     idx = prompt.find("Option")
@@ -126,6 +143,7 @@ def split_text_to_options(prompt):
     option_2 = prompt[idx2:idx3]
     option_3 = prompt[idx3:]
     return [scenario, option_1, option_2, option_3]
+
 
 #
 # completion = client.chat.completions.create(

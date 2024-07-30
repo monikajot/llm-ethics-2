@@ -40,7 +40,7 @@ def run_compare_option_analysis(
         print(f"STARTING {n}th ITER")
         for i in tqdm(range(len(scenarios))):
             # shuffle rows
-            if shuffle_flag: #for direct case!!
+            if shuffle_flag:  # for direct case!!
                 deontology_data = deontology_data.sample(
                     frac=1, random_state=1
                 ).reset_index()["statement"]
@@ -89,7 +89,6 @@ def run_compare_option_analysis(
     print("RESULTS", results_map)
     pd.DataFrame(results_map, index=[0]).to_csv(f"indirect_results.csv")
     save_df(results_data, "final_indirect_output.csv")
-
 
 
 run_compare_option_analysis(
