@@ -1,10 +1,10 @@
-import pandas as pd
-import cohere
-from openai import OpenAI
-import time
 import os
+import time
 
-# print(os.environ['CO_API_KEY'])
+import cohere
+import pandas as pd
+from openai import OpenAI
+
 
 client = OpenAI()
 co = cohere.Client(os.environ.get("CO_API_KEY"))
@@ -35,6 +35,16 @@ def query_model(model, message, system):
         if model == "gpt-4":
             response = client.chat.completions.create(
                 model="gpt-4-0613",
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": message},
+                ],
+            )
+            response = response.choices[0].message.content
+
+        if model == "gpt-4o-mini":
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system},
                     {"role": "user", "content": message},
@@ -123,16 +133,6 @@ def generate_dataset_from_all_scenarions():
     df.to_csv(f"indirect_util_deon_evil_{N}.csv")
 
 
-# generate_dataset_from_all_scenarions()
-# test
-response = query_model(
-    "gpt-3.5",
-    "Hello! Can you help me with a maths problem",
-    "You are a helpful assistant. ",
-)
-print(response)
-
-
 def split_text_to_options(prompt):
     idx = prompt.find("Option")
     idx2 = prompt.find("Option", idx + 1)
@@ -145,11 +145,46 @@ def split_text_to_options(prompt):
     return [scenario, option_1, option_2, option_3]
 
 
-#
-# completion = client.chat.completions.create(
-#   model="gpt-3.5-turbo",
-#   messages=[
-#     {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
-#     {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
-#   ]
-# )
+def get_list_mean(l: str):
+    try:
+        list_ = [int(i) for i in l.split(",")]
+        mean = sum(list_) / len(list_)
+        return mean
+    except:
+        return None
+
+
+def filter_non_its(string):
+    try:
+        x = float(string)
+    except:
+        x = None
+    return x
+
+
+def print_discard_rate(filename="mft_dataset_60-560.csv"):
+    data = pd.read_csv(filename, index_col=0)
+    data["filtered_scores"] = data["scores"].apply(filter_non_its)
+    print(len(data))
+    print(data["filtered_scores"].isna().sum())
+    print(len(data[data["filtered_scores"] > 8]))
+
+
+if __name__ == "__main__":
+    generate_dataset_from_all_scenarions()
+    # test
+    response = query_model(
+        "gpt-3.5",
+        "Hello! Can you help me with a maths problem",
+        "You are a helpful assistant. ",
+    )
+    print("UNRELATED DAMN " + response)
+
+    # completion = client.chat.completions.create(
+    #   model="gpt-3.5-turbo",
+    #   messages=[
+    #     {"role": "system",
+    #     "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
+    #     {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
+    #   ]
+    # )

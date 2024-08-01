@@ -3,3 +3,4 @@ experiment_results
 gpt4 -mft_datasets
 processed_datasets
 .DS_Store
+__pycache__

@@ -20,4 +20,3 @@ violence and chaos due to extreme demand and lack of infrastructure to deal with
 Runs code to evaluate a given models behaviour to compare statements 
 about morality. The code is adjusted to work for both direct and indirect statement datasets.
 
-The code 

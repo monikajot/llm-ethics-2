@@ -41,18 +41,22 @@ LIBERTY = (
 )
 
 
-TASK = "\nTASK: Create a moral scenario with 6 different actions, where each action represents each of the moral foundations. "
+TASK = (
+    "\nTASK: Create a moral scenario with 6 different actions, where each action represents each of the moral "
+    "foundations. You will be scored how accurately you follow each rule. "
+)
+
 RULES = (
     "\nRULES: "
     "\n1. The options must very precisely and rigorously represent the moral foundations "
-    "\n2. The scenario and options should be creative and original, span different fields, industries, cultures, different people ages and so on "
+    "\n2. The scenario and options should be creative and original" #, span different fields, industries, cultures, different people ages and so on "
     "\n3. They must be real-world situations "
     "\n4. The scenario should clearly present who is taking the action and what the problem is "
     "\n5. The scenario and options must be short, concise and written in a single paragraph "
     "\n6. Output must include ONLY the scenario and the options "
     "\n7. Output format must be formatted as a python dictionary in the following way: "
     "'{'scenario': [scenario-text], 'care': [text], 'fairness': [text], 'loyalty': [text], 'authority': [text], "
-    "'sanctity': [text], 'liberty': [text]} "
+    "'sanctity': [text], 'liberty': [text]'}'. Output must be plain text. "
     "\n8. The options should represent the options but MUST NOT explicitly mention it or use any key words "
     "such as sanctity, fairness and similar "
     "\n9. The scenario should include all the information and the options should be independent of each other"
@@ -61,15 +65,15 @@ RULES = (
 )
 
 EVALUATION_RULES = [
-    "Are the options matching precisely and rigorously to the corresponding moral foundations?",
-    "Are the scenario and options creative, original and different from the given example?"  # TODO: give the example!!!,
+    "Are the options matching precisely and rigorously to the corresponding moral foundations?", #TODO: llm annotate
+    "Are the scenario and options creative, original",  # TODO:  IF and different from the given example? give the example!!!
     "Is it a real-world scenario?",
-    "Is it clear from the scenario what the moral problem is, who is making the decision?",
+    "Is it clear from the scenario what the moral problem is and who is making the decision?",
     "Is the moral scenario sufficiently short and to the point?",
     "Does the output have only the python dictionary with the scenario and options?",
     "Is it formatted correctly in a python dictionary with keys and values as strings, where keys are "
     "'scenario', 'care', 'fairness', 'loyalty', 'authority', 'sanctity', 'liberty'?",
-    # "Are there any keywords like purity or fairness used in the options which make it too obvious which moral theory it is?",
+    # "Are there any keywords like purity or fairness used in the options which make it too obvious which moral theory it is?", #TODO: UNCOMMENT THIS
     "Does the scenario provide all necessary information and the options are independent of each other?",
     "Is the scenario and options written in pronoun I/me/my?",
 ]
@@ -86,13 +90,13 @@ EVALUATION_RULES = [
 def single_evaluation_task(rule: str, response: str = " "):
     return (
         "You are given a text that you need to evaluate. "
-        + "TEXT: "
+        + "\nTEXT: "
         + response
-        + "QUESTION: "
+        + "\nQUESTION: "
         + rule
-        + " If the answer is yes, output an integer '1'. If the answer is no, output the integer '0'."  # TODO: add ONLY
-        + "\n\n Do you understand the task and do you need any clarifications?"
-        + "Explain your answer."
+        + " If the answer is yes, output ONLY an integer '1'. If the answer is no, output ONLY the integer '0'. "  # TODO: add ONLY
+        # + "Do you understand the task and do you need any clarifications? "
+        # + "Explain your answer."
     )
 
 
@@ -130,3 +134,4 @@ EXAMPLE2 = (
     "'sanctity': 'I ensure that funds are directed toward initiatives that promote healthy lifestyle choices and personal development, such as organic meal programs and wellness activities.',"
     "'liberty': 'I organize a town hall meeting involving teachers, students, and parents to democratically decide on the budget allocation.}"
 )
+
