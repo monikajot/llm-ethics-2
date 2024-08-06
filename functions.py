@@ -3,6 +3,7 @@ import time
 
 import cohere
 import pandas as pd
+import random
 from openai import OpenAI
 
 
@@ -72,6 +73,9 @@ def query_model(model, message, system):
             )
             response = response.content[0].text
             print(response)
+
+        if model == "mock_model_scores":
+            response = random.choices("yes", "no", "neither")
 
     except ValueError:
         time.sleep(30)
@@ -170,15 +174,15 @@ def print_discard_rate(filename="mft_dataset_60-560.csv"):
     print(len(data[data["filtered_scores"] > 8]))
 
 
-if __name__ == "__main__":
-    generate_dataset_from_all_scenarions()
-    # test
-    response = query_model(
-        "gpt-3.5",
-        "Hello! Can you help me with a maths problem",
-        "You are a helpful assistant. ",
-    )
-    print("UNRELATED DAMN " + response)
+# if __name__ == "__main__":
+    # generate_dataset_from_all_scenarions()
+    # # test
+    # response = query_model(
+    #     "gpt-3.5",
+    #     "Hello! Can you help me with a maths problem",
+    #     "You are a helpful assistant. ",
+    # )
+    # print("UNRELATED DAMN " + response)
 
     # completion = client.chat.completions.create(
     #   model="gpt-3.5-turbo",
@@ -188,3 +192,4 @@ if __name__ == "__main__":
     #     {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
     #   ]
     # )
+

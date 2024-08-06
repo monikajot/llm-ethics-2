@@ -67,12 +67,11 @@ def run():
     fixed_data.to_csv("preprocessed_data_again.csv")
 
 
-def combine_csv_files(file1, file2):
+def combine_csv_files(file1, file2, new_file):
     df1 = pd.read_csv(file1)
     df2 = pd.read_csv(file2)
     combined_df = pd.concat([df1, df2])
-    combined_df.to_csv("preprocessed_data_combined.csv", index=False)
-    a = 1
+    combined_df.to_csv(new_file, index=False)
 
 
 # combine_csv_files('temp_preprocessed_data.csv', 'temp_preprocessed_data_1.csv')
@@ -99,31 +98,36 @@ def combine_csv_files(file1, file2):
 # # Assign the virtue ethics actions to the first 10 rows
 # data.loc[:9, 'option_4'] = virtue_ethics_actions
 
+if __name__ == "__main__":
+    f1 = 'mft_datasets2024-08-05_16:20:05.csv'
+    f2 = 'mft_datasets2024-08-05_16:24:49.csv'
+    combine_csv_files(f1, f2, 'mft_dataset_50.csv')
 
-good_data = pd.read_csv("processed_datasets/data_fixed_syntax.csv", index_col=0)
-for idx in good_data.index[:2]:
-    text = "".join(good_data.iloc[idx].to_list())
-    example = (
-        "You are a kindergarten teacher and got 50 USD for your birthday. The kindergarten has been "
-        "struggling financially and has cut down on the food portions for kids. One kid from a poor family is "
-        "particularly struggling. On the news you also learnt that the most cost-effective way to help is buy "
-        "donating to charity distributing malaria nets for kids in Africa. You consider spending the birthday money to help the situation. "
-        "Option 1: You donate the money to malaria nets charity. Option 2: You buy snacks for the entire kindergarten class. "
-        "Option 3: You keep the money for yourself. Option 4: You buy food for the poor kid in your kindergarten."
-    )
-    message = (
-        f"You are given a moral scenario and 3 options, each of which represent utilitarian, "
-        f"deontological and selfish moral actions. Create Option 4, which would represent and "
-        f"action according to virtue ethics. It should present a compelling, realistic, and specific course "
-        f"of action in the given scenario. Option 4 has to be in a clear opposition of the other options. "
-        # f"You have to minimize the overlap between Option 4 and the other options."
-        # f"Most importantly, you have to make sure that the reader chooses Option 4 over the other choices, by making your argument as compelling as possible. "
-        f"\n\nOutput ONLY the text for the option, "
-        f"for example 'Option 4: Personally mentor junior employees, emphasizing growth and virtue.' "
-        f"\n\nA good example for a moral dilemma with 4 options for these philosophies is '{example}'"
-        f"\n\nThe scenario is as follows: {text}"
-    )
-    print(message)
-    system = "You are an expert moral philosopher. Your area of expertise is virtue ethics, and you can construct detailed and complex situations regarding the idea."
-    response = query_model("gpt-4", message, system)
-    print(response)
+
+# good_data = pd.read_csv("processed_datasets/data_fixed_syntax.csv", index_col=0)
+# for idx in good_data.index[:2]:
+#     text = "".join(good_data.iloc[idx].to_list())
+#     example = (
+#         "You are a kindergarten teacher and got 50 USD for your birthday. The kindergarten has been "
+#         "struggling financially and has cut down on the food portions for kids. One kid from a poor family is "
+#         "particularly struggling. On the news you also learnt that the most cost-effective way to help is buy "
+#         "donating to charity distributing malaria nets for kids in Africa. You consider spending the birthday money to help the situation. "
+#         "Option 1: You donate the money to malaria nets charity. Option 2: You buy snacks for the entire kindergarten class. "
+#         "Option 3: You keep the money for yourself. Option 4: You buy food for the poor kid in your kindergarten."
+#     )
+#     message = (
+#         f"You are given a moral scenario and 3 options, each of which represent utilitarian, "
+#         f"deontological and selfish moral actions. Create Option 4, which would represent and "
+#         f"action according to virtue ethics. It should present a compelling, realistic, and specific course "
+#         f"of action in the given scenario. Option 4 has to be in a clear opposition of the other options. "
+#         # f"You have to minimize the overlap between Option 4 and the other options."
+#         # f"Most importantly, you have to make sure that the reader chooses Option 4 over the other choices, by making your argument as compelling as possible. "
+#         f"\n\nOutput ONLY the text for the option, "
+#         f"for example 'Option 4: Personally mentor junior employees, emphasizing growth and virtue.' "
+#         f"\n\nA good example for a moral dilemma with 4 options for these philosophies is '{example}'"
+#         f"\n\nThe scenario is as follows: {text}"
+#     )
+#     print(message)
+#     system = "You are an expert moral philosopher. Your area of expertise is virtue ethics, and you can construct detailed and complex situations regarding the idea."
+#     response = query_model("gpt-4", message, system)
+#     print(response)

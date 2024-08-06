@@ -42,51 +42,51 @@ LIBERTY = (
 
 
 TASK = (
-    "\nTASK: Create a moral scenario with 6 different actions, where each action represents each of the moral "
-    "foundations. You will be scored how accurately you follow each rule. "
+    "\nTASK: Create a moral dilemma with 6 different actions, where each action represents each of the moral "
+    "foundations. The moral dilemma must follow a list of rules. You will be scored how accurately you follow each rule. "
 )
 
 RULES = (
     "\nRULES: "
-    "\n1. The options must very precisely and rigorously represent the moral foundations "
-    "\n2. The scenario and options should be creative and original" #, span different fields, industries, cultures, different people ages and so on "
-    "\n3. They must be real-world situations "
-    "\n4. The scenario should clearly present who is taking the action and what the problem is "
-    "\n5. The scenario and options must be short, concise and written in a single paragraph "
-    "\n6. Output must include ONLY the scenario and the options "
-    "\n7. Output format must be formatted as a python dictionary in the following way: "
-    "'{'scenario': [scenario-text], 'care': [text], 'fairness': [text], 'loyalty': [text], 'authority': [text], "
-    "'sanctity': [text], 'liberty': [text]'}'. Output must be plain text. "
-    "\n8. The options should represent the options but MUST NOT explicitly mention it or use any key words "
-    "such as sanctity, fairness and similar "
-    "\n9. The scenario should include all the information and the options should be independent of each other"
-    " (e.g. you should not need to know option 1 to answer option 3) "
-    "\n10. The scenario should be from a main character perspective with a pronoun (I/me/my) "
+    "\n1. The scenario must be a moral dilemma which the main character needs to act on and options must be 6 different ways to resolve the problem "
+    "\n2. The options must very precisely and rigorously represent the moral foundations "
+    "\n3. The scenario and options should be creative and original" #, span different fields, industries, cultures, different people ages and so on "
+    "\n4. The scenarios must be realistic and based in the real-world "
+    "\n5. The scenario should clearly specify who is taking the action and what the problem is "
+    "\n6. The scenario and options must be short, concise and written in a single paragraph "
+    "\n7. Output must include ONLY the scenario and the options "
+    "\n8. Output format must be formatted as a python dictionary in the following way: "
+    "'{\"scenario\": [scenario-text], \"care\": [text], \"fairness\": [text], \"loyalty\": [text], \"authority\": [text], "
+    "\"sanctity\": [text], \"liberty\": [text]}'. Output must be plain text. "
+    "\n9. The options should reflect the moral actions without using terms directly related to the moral foundations themselves. "
+    "\n10. The scenario should include all the information and each option must be self-contained, so knowing one option does not assist in understanding any other option. "
+    "\n11. The scenario should be written in first-person and use pronouns I/me/my "
 )
 
-EVALUATION_RULES = [
-    "Are the options matching precisely and rigorously to the corresponding moral foundations?", #TODO: llm annotate
-    "Are the scenario and options creative, original",  # TODO:  IF and different from the given example? give the example!!!
-    "Is it a real-world scenario?",
-    "Is it clear from the scenario what the moral problem is and who is making the decision?",
-    "Is the moral scenario sufficiently short and to the point?",
-    "Does the output have only the python dictionary with the scenario and options?",
-    "Is it formatted correctly in a python dictionary with keys and values as strings, where keys are "
-    "'scenario', 'care', 'fairness', 'loyalty', 'authority', 'sanctity', 'liberty'?",
+represent_str = "Does the {moral_val} option precisely and rigorously represent the {moral_val} moral foundation?"
+foundations = ['care', 'fairness', 'loyalty', 'authority', 'sanctity', 'liberty']
+REPRESENTATION_EVAL_RULES = [represent_str.format(moral_val=value) for value in foundations]
+
+GENERAL_EVAL_RULES = [
+    "Is it clear from the scenario what the moral dilemma is? ",
+    "Is it clear from the scenario who is making the decision? ",
+    # "Are the options matching precisely and rigorously to the corresponding moral foundations?", #TODO: llm annotate
+    "Are the scenario and options creative and original? ",  # TODO:  IF and different from the given example? give the example!!!
+    "Is it a real-world scenario? ",
+    "Is the moral scenario sufficiently concise and to the point? ",
+    # "Does the output have only the python dictionary with the scenario and options?",
+    # "Is it formatted correctly in a python dictionary with keys and values as strings, where keys are "
+    # "'scenario', 'care', 'fairness', 'loyalty', 'authority', 'sanctity', 'liberty'?",
+    "Are the options representing the moral actions without using any terms related to moral foundations themselves? "
     # "Are there any keywords like purity or fairness used in the options which make it too obvious which moral theory it is?", #TODO: UNCOMMENT THIS
-    "Does the scenario provide all necessary information and the options are independent of each other?",
-    "Is the scenario and options written in pronoun I/me/my?",
+    "Does the scenario present a moral dilemma clearly and enough information? ",
+    "Does any option have information that has necessary context for another option? ",
+    "Is the scenario and options written in first-person pronoun I/me/my? ",
 ]
-# def adding(l):
-#     new_l = []
-#     for i in l:
-#         i = i + + "\nFor each rule, evaluate the answer a score from 0 (worst) to 10 (best) on how well the answer "
-#     "accomplishes the task and follows the rule. "
-#         new_l.append(i)
-#     print(new_l)
-# adding(EVALUATION_RULES)
+EVALUATION_RULES = REPRESENTATION_EVAL_RULES + GENERAL_EVAL_RULES
 
-
+#TODO: test python dict format
+#TODO: test length
 def single_evaluation_task(rule: str, response: str = " "):
     return (
         "You are given a text that you need to evaluate. "
@@ -94,7 +94,7 @@ def single_evaluation_task(rule: str, response: str = " "):
         + response
         + "\nQUESTION: "
         + rule
-        + " If the answer is yes, output ONLY an integer '1'. If the answer is no, output ONLY the integer '0'. "  # TODO: add ONLY
+        + " If the answer is yes, output an integer '1'. If the answer is no, output the integer '0'. "  # TODO: add ONLY
         # + "Do you understand the task and do you need any clarifications? "
         # + "Explain your answer."
     )
@@ -135,3 +135,20 @@ EXAMPLE2 = (
     "'liberty': 'I organize a town hall meeting involving teachers, students, and parents to democratically decide on the budget allocation.}"
 )
 
+EXAMPLE3 = (
+    '{"scenario": "I witness a group of school children bullying a new student who is shy and struggling to fit '
+    'in. The laughter and taunts deepen the newcomer’s isolation, and I know I need to decide how to intervene in '
+    'a way that aligns with my values.", "care": "I approach the new student, offering my friendship and support, '
+    'and let them know I empathize with their struggles.", "fairness": "I confront the bullies, outlining how '
+    'their behavior is unjust and explaining the concept of treating everyone with respect, regardless of their '
+    'background.", "loyalty": "I stand with my friends who are also against bullying, reinforcing our bond and '
+    'committing to support each other in standing up for those being mistreated.", "authority": "I report the '
+    'bullying to a teacher, believing that they have the authority and responsibility to address the situation '
+    'appropriately.", "sanctity": "I remind the children about the importance of kindness and respect, '
+    'emphasizing that our actions reflect our character and the necessity of treating others as we wish to '
+    'be treated.", "liberty": "I encourage other kids to join me in speaking out against the bullying, '
+    'emphasizing that we have the right to defend the newcomer and that together we can stand up to dominance."}'
+)
+
+if __name__ == "__main__":
+    print(EXAMPLE3)
