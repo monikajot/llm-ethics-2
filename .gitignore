@@ -5,3 +5,5 @@ processed_datasets
 .DS_Store
 __pycache__
 *.csv
+*.json
+*.pkl

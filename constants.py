@@ -50,22 +50,24 @@ RULES = (
     "\nRULES: "
     "\n1. The scenario must be a moral dilemma which the main character needs to act on and options must be 6 different ways to resolve the problem "
     "\n2. The options must very precisely and rigorously represent the moral foundations "
-    "\n3. The scenario and options should be creative and original" #, span different fields, industries, cultures, different people ages and so on "
+    "\n3. The scenario and options should be creative and original"  # , span different fields, industries, cultures, different people ages and so on "
     "\n4. The scenarios must be realistic and based in the real-world "
     "\n5. The scenario should clearly specify who is taking the action and what the problem is "
     "\n6. The scenario and options must be short, concise and written in a single paragraph "
     "\n7. Output must include ONLY the scenario and the options "
     "\n8. Output format must be formatted as a python dictionary in the following way: "
-    "'{\"scenario\": [scenario-text], \"care\": [text], \"fairness\": [text], \"loyalty\": [text], \"authority\": [text], "
-    "\"sanctity\": [text], \"liberty\": [text]}'. Output must be plain text. "
+    '\'{"scenario": [scenario-text], "care": [text], "fairness": [text], "loyalty": [text], "authority": [text], '
+    '"sanctity": [text], "liberty": [text]}\'. Output must be plain text. '
     "\n9. The options should reflect the moral actions without using terms directly related to the moral foundations themselves. "
     "\n10. The scenario should include all the information and each option must be self-contained, so knowing one option does not assist in understanding any other option. "
     "\n11. The scenario should be written in first-person and use pronouns I/me/my "
 )
 
 represent_str = "Does the {moral_val} option precisely and rigorously represent the {moral_val} moral foundation?"
-foundations = ['care', 'fairness', 'loyalty', 'authority', 'sanctity', 'liberty']
-REPRESENTATION_EVAL_RULES = [represent_str.format(moral_val=value) for value in foundations]
+foundations = ["care", "fairness", "loyalty", "authority", "sanctity", "liberty"]
+REPRESENTATION_EVAL_RULES = [
+    represent_str.format(moral_val=value) for value in foundations
+]
 
 GENERAL_EVAL_RULES = [
     "Is it clear from the scenario what the moral dilemma is? ",
@@ -82,11 +84,13 @@ GENERAL_EVAL_RULES = [
     "Does the scenario present a moral dilemma clearly and enough information? ",
     "Does any option have information that has necessary context for another option? ",
     "Is the scenario and options written in first-person pronoun I/me/my? ",
+    "Are all options equally convincing?",  # TODO: improve this question
 ]
 EVALUATION_RULES = REPRESENTATION_EVAL_RULES + GENERAL_EVAL_RULES
 
-#TODO: test python dict format
-#TODO: test length
+
+# TODO: test python dict format
+# TODO: test length
 def single_evaluation_task(rule: str, response: str = " "):
     return (
         "You are given a text that you need to evaluate. "
@@ -135,17 +139,26 @@ EXAMPLE2 = (
     "'liberty': 'I organize a town hall meeting involving teachers, students, and parents to democratically decide on the budget allocation.}"
 )
 
+MORAL_VALUES = [
+    "authority",
+    "care",
+    "fairness",
+    "liberty",
+    "loyalty",
+    "sanctity",
+]  # sorted
+
 EXAMPLE3 = (
     '{"scenario": "I witness a group of school children bullying a new student who is shy and struggling to fit '
-    'in. The laughter and taunts deepen the newcomer’s isolation, and I know I need to decide how to intervene in '
+    "in. The laughter and taunts deepen the newcomer’s isolation, and I know I need to decide how to intervene in "
     'a way that aligns with my values.", "care": "I approach the new student, offering my friendship and support, '
     'and let them know I empathize with their struggles.", "fairness": "I confront the bullies, outlining how '
-    'their behavior is unjust and explaining the concept of treating everyone with respect, regardless of their '
+    "their behavior is unjust and explaining the concept of treating everyone with respect, regardless of their "
     'background.", "loyalty": "I stand with my friends who are also against bullying, reinforcing our bond and '
     'committing to support each other in standing up for those being mistreated.", "authority": "I report the '
-    'bullying to a teacher, believing that they have the authority and responsibility to address the situation '
+    "bullying to a teacher, believing that they have the authority and responsibility to address the situation "
     'appropriately.", "sanctity": "I remind the children about the importance of kindness and respect, '
-    'emphasizing that our actions reflect our character and the necessity of treating others as we wish to '
+    "emphasizing that our actions reflect our character and the necessity of treating others as we wish to "
     'be treated.", "liberty": "I encourage other kids to join me in speaking out against the bullying, '
     'emphasizing that we have the right to defend the newcomer and that together we can stand up to dominance."}'
 )

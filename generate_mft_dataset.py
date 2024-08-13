@@ -25,22 +25,22 @@ from constants import (
 from functions import query_model, get_list_mean
 
 GENERATE_SCENARIO_TEXT = (
-        MFT_EXPLANATION
-        + CARE
-        + FAIRNESS
-        + LOYALTY
-        + AUTHORITY
-        + SANCTITY
-        + LIBERTY
-        + TASK
-        + RULES
-        # + " \n If something in the task is unclear, make sure to clarify it before answering"
-        # + "\n Do you understand the rules? Go through each rule, explain it back to me and say if you have any uncertainties or confusions about it. "
-        # + EXAMPLE1  # TODO: have more and randomly change them. specify only the keys and not vals
+    MFT_EXPLANATION
+    + CARE
+    + FAIRNESS
+    + LOYALTY
+    + AUTHORITY
+    + SANCTITY
+    + LIBERTY
+    + TASK
+    + RULES
+    # + " \n If something in the task is unclear, make sure to clarify it before answering"
+    # + "\n Do you understand the rules? Go through each rule, explain it back to me and say if you have any uncertainties or confusions about it. "
+    # + EXAMPLE1  # TODO: have more and randomly change them. specify only the keys and not vals
 )
 
-MODEL= "gpt-4o"
-NUM_EXAMPLES = 40# 20
+MODEL = "gpt-4o"
+NUM_EXAMPLES = 40  # 20
 
 
 def generate_single_mft_scenario(verbose: bool = True):
@@ -54,7 +54,9 @@ def generate_single_mft_scenario(verbose: bool = True):
 def run_dataset_generation(output_filename=None, num_examples=NUM_EXAMPLES):
     start_time = time.time()
     if output_filename is None:
-        output_filename = "mft_datasets" + dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + ".csv"
+        output_filename = (
+            "mft_datasets" + dt.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + ".csv"
+        )
     responses = []
     responses_scores = []
     score_dict = {rule: [] for rule in EVALUATION_RULES}
@@ -70,7 +72,7 @@ def run_dataset_generation(output_filename=None, num_examples=NUM_EXAMPLES):
         data_dict = {"responses": responses, "scores": responses_scores}
         data = pd.DataFrame({**data_dict, **score_dict})
         data.to_csv(output_filename)
-    print(time.time()-start_time)
+    print(time.time() - start_time)
 
 
 def evaluator(response: str, score_dict: dict, verbose: bool = True):
@@ -100,8 +102,10 @@ def evaluator(response: str, score_dict: dict, verbose: bool = True):
     return evaluations, score_dict
 
 
-def scored_datasets_with_means(filename: str, ):
-    """ Append a column of TRUE/FALSE if the scenario is good enough or not"""
+def scored_datasets_with_means(
+    filename: str,
+):
+    """Append a column of TRUE/FALSE if the scenario is good enough or not"""
     data = pd.read_csv(filename, index_col=0)
     # invert qs
 
@@ -113,16 +117,16 @@ def scored_datasets_with_means(filename: str, ):
         else:
             good_list.append(False)
     data["example_score"] = good_list
-    data.to_csv(filename+"_with_mean_scores.csv")
+    data.to_csv(filename + "_with_mean_scores.csv")
 
 
 def get_best_examples(filename: str, percent: int):
     data = pd.read_csv(filename, index_col=0)
-    data["sums"] = data["scores"].apply(lambda x: ast.literal_eval(x) ).apply(sum)
+    data["sums"] = data["scores"].apply(lambda x: ast.literal_eval(x)).apply(sum)
     sorted_data = data.sort_values(by="sums", ascending=False)
     num_rows = int(len(data) * (percent / 100))
     top_x_percent = sorted_data.head(num_rows)
-    top_x_percent.to_csv( f"top_{percent}p_of_" + filename)
+    top_x_percent.to_csv(f"top_{percent}p_of_" + filename)
 
 
 def preprocess_scenario(example: str):
@@ -135,7 +139,15 @@ def preprocess_scenario(example: str):
         return
 
     if isinstance(example_dict, dict):
-        keys = ['scenario', 'care', 'fairness', 'loyalty', 'authority', 'sanctity', 'liberty']
+        keys = [
+            "scenario",
+            "care",
+            "fairness",
+            "loyalty",
+            "authority",
+            "sanctity",
+            "liberty",
+        ]
         if list(example_dict.keys()) == keys:
             return example
     return
@@ -150,8 +162,9 @@ def check_dataset_formatting(filename: str):
         row = preprocess_scenario(row)
         rows.append(row)
     data["responses"] = pd.Series(rows)
-    #data drop nans
+    # data drop nans
     data.to_csv("formatted_" + filename)
+
 
 def run():
     # generate and evaluate examples
@@ -165,7 +178,6 @@ if __name__ == "__main__":
     # evaluator(response)
 
     # run_dataset_generation()
-    pass
+
     # get_best_examples(f, 10)
-
-
+    pass

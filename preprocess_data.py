@@ -99,9 +99,9 @@ def combine_csv_files(file1, file2, new_file):
 # data.loc[:9, 'option_4'] = virtue_ethics_actions
 
 if __name__ == "__main__":
-    f1 = 'mft_datasets2024-08-05_16:20:05.csv'
-    f2 = 'mft_datasets2024-08-05_16:24:49.csv'
-    combine_csv_files(f1, f2, 'mft_dataset_50.csv')
+    f1 = "mft_datasets2024-08-05_16:20:05.csv"
+    f2 = "mft_datasets2024-08-05_16:24:49.csv"
+    combine_csv_files(f1, f2, "mft_dataset_50.csv")
 
 
 # good_data = pd.read_csv("processed_datasets/data_fixed_syntax.csv", index_col=0)

@@ -11,7 +11,7 @@ client = OpenAI()
 co = cohere.Client(os.environ.get("CO_API_KEY"))
 
 
-def query_model(model, message, system):
+def query_model(model, message, system, logprobs=False):
     try:
         if model == "cohere":
             response = co.chat(
@@ -28,10 +28,11 @@ def query_model(model, message, system):
                     {"role": "system", "content": system},
                     {"role": "user", "content": message},
                 ],
+                logprobs=logprobs,
             )
 
             # print(completion.choices[0].message)
-            response = completion.choices[0].message.content
+            response = completion  # .choices[0].message.content
 
         if model == "gpt-4":
             response = client.chat.completions.create(
@@ -40,6 +41,7 @@ def query_model(model, message, system):
                     {"role": "system", "content": system},
                     {"role": "user", "content": message},
                 ],
+                logprobs=logprobs,
             )
             response = response.choices[0].message.content
 
@@ -50,6 +52,7 @@ def query_model(model, message, system):
                     {"role": "system", "content": system},
                     {"role": "user", "content": message},
                 ],
+                logprobs=logprobs,
             )
             response = response.choices[0].message.content
 
@@ -60,6 +63,7 @@ def query_model(model, message, system):
                     {"role": "system", "content": system},
                     {"role": "user", "content": message},
                 ],
+                logprobs=logprobs,
             )
             response = response.choices[0].message.content
 
@@ -75,7 +79,26 @@ def query_model(model, message, system):
             print(response)
 
         if model == "mock_model_scores":
-            response = random.choices("yes", "no", "neither")
+            response = random.choices(["yes", "no", "neither"])[0]
+
+        if model == "mock_model_scores_2":
+            response = random.choices(["Option 1", "Option 2", "neither"])[0]
+        if model == "mock_model_scores_3":
+            response = random.choices(["Option 1", "Option 2", "Option 3", "neither"])[
+                0
+            ]
+        if model == "mock_model_scores_6":
+            response = random.choices(
+                [
+                    "Option 1",
+                    "Option 2",
+                    "Option 3",
+                    "Option 4",
+                    "Option 5",
+                    "Option 6",
+                    "neither",
+                ]
+            )[0]
 
     except ValueError:
         time.sleep(30)
@@ -174,22 +197,21 @@ def print_discard_rate(filename="mft_dataset_60-560.csv"):
     print(len(data[data["filtered_scores"] > 8]))
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     # generate_dataset_from_all_scenarions()
     # # test
-    # response = query_model(
-    #     "gpt-3.5",
-    #     "Hello! Can you help me with a maths problem",
-    #     "You are a helpful assistant. ",
-    # )
-    # print("UNRELATED DAMN " + response)
+    response = query_model(
+        "gpt-3.5",
+        "Hello! Can you help me with a maths problem",
+        "You are a helpful assistant. ",
+    )
+    print(response)
 
     # completion = client.chat.completions.create(
-    #   model="gpt-3.5-turbo",
+    #   model="gpt-3.5",
     #   messages=[
     #     {"role": "system",
     #     "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
     #     {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
     #   ]
     # )
-
