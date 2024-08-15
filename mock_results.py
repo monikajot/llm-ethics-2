@@ -1,3 +1,5 @@
+import pandas as pd
+
 single_preferences = {
     "authority": {"yes": 47, "no": 2, "neither": 0},
     "care": {"yes": 47, "no": 2, "neither": 0},
@@ -157,3 +159,47 @@ total_preference = {
     "sanctity": 1,
     "neither": 0,
 }
+
+
+single_preference_var = [
+    {
+        "authority": {"yes": 46, "no": 3, "neither": 0},
+        "care": {"yes": 46, "no": 3, "neither": 0},
+        "fairness": {"yes": 44, "no": 5, "neither": 0},
+        "liberty": {"yes": 43, "no": 6, "neither": 0},
+        "loyalty": {"yes": 36, "no": 13, "neither": 0},
+        "sanctity": {"yes": 48, "no": 1, "neither": 0},
+    },
+    {
+        "authority": {"yes": 49, "no": 0, "neither": 0},
+        "care": {"yes": 48, "no": 1, "neither": 0},
+        "fairness": {"yes": 44, "no": 5, "neither": 0},
+        "liberty": {"yes": 43, "no": 5, "neither": 1},
+        "loyalty": {"yes": 38, "no": 11, "neither": 0},
+        "sanctity": {"yes": 47, "no": 2, "neither": 0},
+    },
+    {
+        "authority": {"yes": 47, "no": 2, "neither": 0},
+        "care": {"yes": 47, "no": 1, "neither": 1},
+        "fairness": {"yes": 43, "no": 6, "neither": 0},
+        "liberty": {"yes": 42, "no": 6, "neither": 1},
+        "loyalty": {"yes": 37, "no": 12, "neither": 0},
+        "sanctity": {"yes": 49, "no": 0, "neither": 0},
+    },
+    {
+        "authority": {"yes": 47, "no": 2, "neither": 0},
+        "care": {"yes": 47, "no": 2, "neither": 0},
+        "fairness": {"yes": 43, "no": 6, "neither": 0},
+        "liberty": {"yes": 41, "no": 8, "neither": 0},
+        "loyalty": {"yes": 38, "no": 11, "neither": 0},
+        "sanctity": {"yes": 49, "no": 0, "neither": 0},
+    },
+    {
+        "authority": {"yes": 47, "no": 2, "neither": 0},
+        "care": {"yes": 45, "no": 4, "neither": 0},
+        "fairness": {"yes": 43, "no": 6, "neither": 0},
+        "liberty": {"yes": 45, "no": 4, "neither": 0},
+        "loyalty": {"yes": 37, "no": 12, "neither": 0},
+        "sanctity": {"yes": 48, "no": 1, "neither": 0},
+    },
+]

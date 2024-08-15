@@ -163,5 +163,20 @@ EXAMPLE3 = (
     'emphasizing that we have the right to defend the newcomer and that together we can stand up to dominance."}'
 )
 
+SCENARIO_DICT = "responses"
+SCENARIO = "scenario"
+QUESTION_SINGLES = " Do you agree with the following? "
+QUESTION_PAIRS = " Response must ONLY be a single integer of the most preferred option, for example '1'. "
+OPTION1 = "Option 1: "
+OPTION2 = "Option 2: "
+OPTION3 = "Option 3: "
+OPTION4 = "Option 4: "
+OPTION5 = "Option 5: "
+OPTION6 = "Option 6: "
+SINGLE_PREFERENCE = "single_preference"
+PAIR_PREFERENCE = "pair_preference"
+TRIPLE_PREFERENCE = "triples_preference"
+TOTAL_PREFERENCE = "total_preference"
+
 if __name__ == "__main__":
     print(EXAMPLE3)

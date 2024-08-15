@@ -32,7 +32,7 @@ def query_model(model, message, system, logprobs=False):
             )
 
             # print(completion.choices[0].message)
-            response = completion  # .choices[0].message.content
+            response = completion.choices[0].message.content
 
         if model == "gpt-4":
             response = client.chat.completions.create(

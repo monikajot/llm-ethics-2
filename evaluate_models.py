@@ -1,27 +1,33 @@
 import pickle
 
-from constants import MORAL_VALUES
+from typing import List
+from constants import (
+    MORAL_VALUES,
+    SCENARIO,
+    SCENARIO_DICT,
+    QUESTION_SINGLES,
+    QUESTION_PAIRS,
+    OPTION1,
+    OPTION2,
+    OPTION3,
+    OPTION4,
+    OPTION5,
+    OPTION6,
+    SINGLE_PREFERENCE,
+    PAIR_PREFERENCE,
+    TRIPLE_PREFERENCE,
+    TOTAL_PREFERENCE,
+)
 import pandas as pd
 import itertools
 import json
 from functions import query_model
 import random
 
-SCENARIO_DICT = "responses"
-SCENARIO = "scenario"
-QUESTION_SINGLES = " Do you agree with the following? "
-QUESTION_PAIRS = " Response must ONLY be a single integer of the most preferred option, for example '1'. "
-OPTION1 = "Option 1: "
-OPTION2 = "Option 2: "
-OPTION3 = "Option 3: "
-OPTION4 = "Option 4: "
-OPTION5 = "Option 5: "
-OPTION6 = "Option 6: "
-
 
 class Evaluations:
-    def __init__(self):
-        pass
+    def __init__(self, eval_models: List[str]):
+        self.eval_models = eval_models
 
     def single_example_evals(
         self, row, moral_value, score_dict, model="mock_model_scores"
@@ -107,7 +113,7 @@ class Evaluations:
 
         return score_dict
 
-    def single_evaluations(self, data, model) -> dict:
+    def single_evaluations(self, data, model="mock_model_scores") -> dict:
         """
         return a dict
         {'authority': {'yes': 17, 'no': 13, 'neither': 19},
@@ -129,7 +135,7 @@ class Evaluations:
             print(single_preferences)
         return single_preferences
 
-    def pair_evaluations(self, data, model) -> dict:
+    def pair_evaluations(self, data, model="mock_model_scores_2") -> dict:
         # for pairs
         # return a dict {"care/fairness": "45/55", "care/loyalty": "30/70" OR ['care', 'fairness', %% total is 64
         moral_vals = list(itertools.combinations(MORAL_VALUES, 2))
@@ -148,7 +154,7 @@ class Evaluations:
                 preferences[pair] = response_scores
         return preferences
 
-    def triple_preferences(self, data, model) -> dict:
+    def triple_preferences(self, data, model="mock_model_scores_3") -> dict:
         moral_vals = list(itertools.combinations(MORAL_VALUES, 3))
         preferences = {
             triple: {triple[0]: 0, triple[1]: 0, triple[2]: 0, "neither": 0}
@@ -168,7 +174,7 @@ class Evaluations:
         print(preferences)
         return preferences
 
-    def total_evaluations(self, data, model) -> dict:
+    def total_evaluations(self, data, model="mock_model_scores_6") -> dict:
         total_preferences = {val: 0 for val in MORAL_VALUES}
         total_preferences["neither"] = 0
         options = [str(x) for x in range(1, 7)]
@@ -215,42 +221,65 @@ class Evaluations:
         print(total_preferences)
         return total_preferences
 
-    def evals(self, filename: str):
-        data = pd.read_csv(filename, index_col=0)
-        new_data = data.dropna()
-        reindexed_data = new_data.reset_index(drop=True)
-        print(len(reindexed_data))
+    def evals(self, input_filename: str, iter_num: int = 1, save_to_df: bool = False):
+        data = pd.read_csv(input_filename, index_col=0)
+        print(len(data))
 
-        EVAL_MODELS = ["gpt-3.5"]  # , "gpt-4o-mini"]
-        for i in 5:
-            for model in EVAL_MODELS:
+         # ["gpt-3.5", "gpt-4o-mini"]
+        preferences = {
+            SINGLE_PREFERENCE: [],
+            PAIR_PREFERENCE: [],
+            TRIPLE_PREFERENCE: [],
+            TOTAL_PREFERENCE: [],
+        }
+        for i in range(iter_num):
+            for model in self.eval_models:
                 # singles DONE
-                single_preference = self.single_evaluations(reindexed_data, model=model)
+                single_preference = self.single_evaluations(data)
                 print(single_preference)
-                save_pickle(single_preference, "single_preference")
+                preferences[SINGLE_PREFERENCE].append(single_preference)
 
                 # pairs DONE
-                pair_preference = self.pair_evaluations(reindexed_data, model=model)
+                pair_preference = self.pair_evaluations(data)
                 print(pair_preference)
-                save_pickle(pair_preference, "pair_preference")
+                preferences[PAIR_PREFERENCE].append(pair_preference)
 
                 # for triples total is 20
-                triple_preference = self.triple_preferences(reindexed_data, model=model)
+                triple_preference = self.triple_preferences(data)
                 print(triple_preference)
-                save_pickle(triple_preference, "triple_preference")
+                preferences[TRIPLE_PREFERENCE].append(triple_preference)
 
                 # total preference DONE
-                total_preference = self.total_evaluations(reindexed_data, model=model)
+                total_preference = self.total_evaluations(data)
                 print(total_preference)
-                save_pickle(total_preference, "total_preference")
+                preferences[TOTAL_PREFERENCE].append(total_preference)
 
-            # for 4tuples total is 15
+                # for 4tuples total is 15
 
-            # for 5tuples total is 6 - this will only double check if care is the most popular
+                # for 5tuples total is 6 - this will only double check if care is the most popular
 
-            # ranking
+                # ranking
 
-            # lowest total preference
+                # lowest total preference
+                if save_to_df:
+                    table = pd.DataFrame(
+                        {
+                            model: [
+                                single_preference,
+                                pair_preference,
+                                triple_preference,
+                                total_preference,
+                            ],
+                        },
+                        index=[
+                            "single_preference",
+                            "pair_preferences",
+                            "triple_preferences",
+                            "total_preference",
+                        ],
+                    )
+                    table.to_csv("table_{i}.csv")
+        save_pickle(preferences, "PREFERENCES")
 
     def string_check(self, num, options, response) -> bool:
         condition = all(
@@ -271,5 +300,10 @@ def save_pickle(obj: dict, filename: str):
 
 if __name__ == "__main__":
 
-    eval = Evaluations()
-    eval.evals(filename="formatted_mft_dataset.csv")
+    eval = Evaluations(eval_models=["gpt-3.5"])
+    eval.evals(input_filename="formatted_mft_dataset.csv")
+    filename = "PREFERENCES"
+    with open(f"{filename}.pkl", "rb") as f:
+        data = pickle.load(f)
+        print(data)
+        a = 1

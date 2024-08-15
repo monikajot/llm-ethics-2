@@ -1,6 +1,7 @@
-cohere==5.6.2
-matplotlib==3.9.1.post1
+cohere==5.8.0
+matplotlib==3.9.2
 networkx==3.3
-openai==1.40.2
+openai==1.40.6
 pandas==2.2.2
+seaborn==0.13.2
 tqdm==4.66.4

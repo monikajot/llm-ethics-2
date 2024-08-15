@@ -4,6 +4,7 @@ gpt4 -mft_datasets
 processed_datasets
 .DS_Store
 __pycache__
+legacy
 *.csv
 *.json
 *.pkl

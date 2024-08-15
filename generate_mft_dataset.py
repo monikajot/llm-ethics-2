@@ -3,6 +3,7 @@ import itertools
 import time
 import ast
 import json
+from tqdm import tqdm
 
 from json.decoder import JSONDecodeError
 
@@ -10,6 +11,7 @@ import pandas as pd
 
 from constants import (
     single_evaluation_task,
+    foundations,
     EXAMPLE1,
     MFT_EXPLANATION,
     TASK,
@@ -40,10 +42,10 @@ GENERATE_SCENARIO_TEXT = (
 )
 
 MODEL = "gpt-4o"
-NUM_EXAMPLES = 40  # 20
+NUM_EXAMPLES = 50  # 20
 
 
-def generate_single_mft_scenario(verbose: bool = True):
+def generate_single_mft_scenario(verbose: bool = False):
     response = query_model(MODEL, GENERATE_SCENARIO_TEXT, "")
     if verbose:
         print("GENERATE_SCENARIO_TEXT  -----> ", GENERATE_SCENARIO_TEXT + "\n")
@@ -60,22 +62,24 @@ def run_dataset_generation(output_filename=None, num_examples=NUM_EXAMPLES):
     responses = []
     responses_scores = []
     score_dict = {rule: [] for rule in EVALUATION_RULES}
-    for i in range(num_examples):
+    for i in tqdm(range(num_examples)):
+        # generate scenario
         response = generate_single_mft_scenario()
-        # test response format
         isinstance(response, dict)
+
+        # evaluate scenario
         scores, score_dict = evaluator(response, score_dict)
         responses.append(response)
-        # dont apply mean score
-        # score = get_list_mean(score)
         responses_scores.append(scores)
         data_dict = {"responses": responses, "scores": responses_scores}
         data = pd.DataFrame({**data_dict, **score_dict})
         data.to_csv(output_filename)
+
     print(time.time() - start_time)
+    return data
 
 
-def evaluator(response: str, score_dict: dict, verbose: bool = True):
+def evaluator(response: str, score_dict: dict, verbose: bool = False):
     evaluations = []
     for eval_quest in EVALUATION_RULES:
         task = single_evaluation_task(eval_quest, response)
@@ -102,9 +106,7 @@ def evaluator(response: str, score_dict: dict, verbose: bool = True):
     return evaluations, score_dict
 
 
-def scored_datasets_with_means(
-    filename: str,
-):
+def scored_datasets_with_means(filename: str):
     """Append a column of TRUE/FALSE if the scenario is good enough or not"""
     data = pd.read_csv(filename, index_col=0)
     # invert qs
@@ -120,13 +122,13 @@ def scored_datasets_with_means(
     data.to_csv(filename + "_with_mean_scores.csv")
 
 
-def get_best_examples(filename: str, percent: int):
-    data = pd.read_csv(filename, index_col=0)
+def get_best_examples(input_filename: str, percent: int):
+    data = pd.read_csv(input_filename, index_col=0)
     data["sums"] = data["scores"].apply(lambda x: ast.literal_eval(x)).apply(sum)
     sorted_data = data.sort_values(by="sums", ascending=False)
     num_rows = int(len(data) * (percent / 100))
     top_x_percent = sorted_data.head(num_rows)
-    top_x_percent.to_csv(f"top_{percent}p_of_" + filename)
+    top_x_percent.to_csv(f"top_{percent}p_of_" + input_filename)
 
 
 def preprocess_scenario(example: str):
@@ -153,8 +155,9 @@ def preprocess_scenario(example: str):
     return
 
 
-def check_dataset_formatting(filename: str):
-    data = pd.read_csv(filename, index_col=0)
+def check_dataset_formatting(input_filename: str = None, data: pd.DataFrame = None):
+    if input_filename:
+        data = pd.read_csv(input_filename, index_col=0)
     rows = []
     for row_idx in range(len(data)):
         print(row_idx)
@@ -162,8 +165,11 @@ def check_dataset_formatting(filename: str):
         row = preprocess_scenario(row)
         rows.append(row)
     data["responses"] = pd.Series(rows)
+    data_no_nans = data.dropna()
+    reindexed_data = data_no_nans.reset_index(drop=True)
     # data drop nans
-    data.to_csv("formatted_" + filename)
+    reindexed_data.to_csv("formatted_" + input_filename)
+    return reindexed_data
 
 
 def run():
