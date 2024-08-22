@@ -68,40 +68,17 @@ def run():
 
 
 def combine_csv_files(file1, file2, new_file):
-    df1 = pd.read_csv(file1)
-    df2 = pd.read_csv(file2)
+    df1 = pd.read_csv(file1, index_col=0)
+    df2 = pd.read_csv(file2, index_col=0)
     combined_df = pd.concat([df1, df2])
-    combined_df.to_csv(new_file, index=False)
+    df = combined_df.reset_index()
+    df.to_csv(new_file, index=False)
 
-
-# combine_csv_files('temp_preprocessed_data.csv', 'temp_preprocessed_data_1.csv')
-
-# combine_csv_files()
-
-# # Define virtue ethics actions for the first 10 scenarios
-# virtue_ethics_actions = [
-#     "Option 4: You personally volunteer to distribute grain, ensuring fairness and showing compassion.",
-#     "Option 4: You prioritize developing a treatment that is not only effective but also accessible to all, reflecting empathy and justice.",
-#     "Option 4: You create a fair system to decide vaccine distribution, emphasizing honesty and integrity.",
-#     "Option 4: You set up a program to ensure the drug is accessible to the most vulnerable, demonstrating kindness and responsibility.",
-#     "Option 4: You ensure that the alternative project not only benefits more people but is also ethically sound, reflecting wisdom and integrity.",
-#     "Option 4: She personally reviews the software for any potential ethical concerns, showing diligence and responsibility.",
-#     "Option 4: He conducts a thorough investigation into the practices and commits to transparency, showing courage and honesty.",
-#     "Option 4: You prioritize research transparency and the well-being of participants, reflecting integrity and compassion.",
-#     "Option 4: The CEO implements stronger security measures and educates customers, showing responsibility and foresight.",
-#     "Option 4: You organize an exhibition to educate the public about the artifact's history, showing respect and dedication."
-# ]
-#
-# # Create the new column 'option_4' and fill it with NaNs
-# data['option_4'] = np.nan
-#
-# # Assign the virtue ethics actions to the first 10 rows
-# data.loc[:9, 'option_4'] = virtue_ethics_actions
 
 if __name__ == "__main__":
-    f1 = "mft_datasets2024-08-05_16:20:05.csv"
-    f2 = "mft_datasets2024-08-05_16:24:49.csv"
-    combine_csv_files(f1, f2, "mft_dataset_50.csv")
+    f1 = "mft_generated_100_examples_aug_21_gpt4.csv"
+    f2 = "mft_generated_100_examples_aug_21_gpt4_2.csv"
+    combine_csv_files(f1, f2, "mft_generated_100_examples_aug_21_gpt4_3.csv")
 
 
 # good_data = pd.read_csv("processed_datasets/data_fixed_syntax.csv", index_col=0)
@@ -131,3 +108,27 @@ if __name__ == "__main__":
 #     system = "You are an expert moral philosopher. Your area of expertise is virtue ethics, and you can construct detailed and complex situations regarding the idea."
 #     response = query_model("gpt-4", message, system)
 #     print(response)
+
+# combine_csv_files('temp_preprocessed_data.csv', 'temp_preprocessed_data_1.csv')
+
+# combine_csv_files()
+
+# # Define virtue ethics actions for the first 10 scenarios
+# virtue_ethics_actions = [
+#     "Option 4: You personally volunteer to distribute grain, ensuring fairness and showing compassion.",
+#     "Option 4: You prioritize developing a treatment that is not only effective but also accessible to all, reflecting empathy and justice.",
+#     "Option 4: You create a fair system to decide vaccine distribution, emphasizing honesty and integrity.",
+#     "Option 4: You set up a program to ensure the drug is accessible to the most vulnerable, demonstrating kindness and responsibility.",
+#     "Option 4: You ensure that the alternative project not only benefits more people but is also ethically sound, reflecting wisdom and integrity.",
+#     "Option 4: She personally reviews the software for any potential ethical concerns, showing diligence and responsibility.",
+#     "Option 4: He conducts a thorough investigation into the practices and commits to transparency, showing courage and honesty.",
+#     "Option 4: You prioritize research transparency and the well-being of participants, reflecting integrity and compassion.",
+#     "Option 4: The CEO implements stronger security measures and educates customers, showing responsibility and foresight.",
+#     "Option 4: You organize an exhibition to educate the public about the artifact's history, showing respect and dedication."
+# ]
+#
+# # Create the new column 'option_4' and fill it with NaNs
+# data['option_4'] = np.nan
+#
+# # Assign the virtue ethics actions to the first 10 rows
+# data.loc[:9, 'option_4'] = virtue_ethics_actions

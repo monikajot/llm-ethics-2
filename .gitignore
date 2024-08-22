@@ -5,6 +5,9 @@ processed_datasets
 .DS_Store
 __pycache__
 legacy
-*.csv
+test_name.csv
+top_50p_of_formatted_test_name.csv
 *.json
 *.pkl
+*.csv
+*.npy

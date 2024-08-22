@@ -9,11 +9,11 @@ from constants import MORAL_VALUES
 from mock_results import pair_preference
 
 OPTIONS = {
-    "font_size": 12,
-    "node_size": 3000,
+    "font_size": 8,
+    "node_size": 1500,
     "node_color": "lightblue",
     "edgecolors": "black",
-    "linewidths": 2.5,
+    "linewidths": 1.5,
     "width": 1.5,
 }
 
@@ -29,7 +29,6 @@ def plot_pair_graph(pair_preferences=pair_preference, output_filename="pair_grap
     }
 
     G = nx.DiGraph(new_dict.keys())
-
     nx.draw_networkx(G, node_coords, **OPTIONS)
 
     # Set margins for the axes so that nodes aren't clipped
@@ -39,6 +38,19 @@ def plot_pair_graph(pair_preferences=pair_preference, output_filename="pair_grap
     # plt.show()
     plt.close()
     ax.figure.savefig(output_filename)
+
+
+def plot_single_graph(edges, node_coords, output_filename="single_graph.png"):
+    G = nx.DiGraph(edges)
+    nx.draw_networkx(G, node_coords, **OPTIONS)
+
+    # Set margins for the axes so that nodes aren't clipped
+    ax = plt.gca()
+    ax.margins(0.20)
+    plt.axis("off")
+    plt.show()
+    plt.close()
+    # ax.figure.savefig(output_filename)
 
 def get_counts(new_dict):
     # get the number of edges that are pointing to a value
@@ -98,5 +110,5 @@ if __name__ == "__main__":
     with open(f"PREFERENCES.pkl", "rb") as f:
         preferences = pickle.load(f)
     # print(preferences["pair_preference"][0])
-    plot_pair_heatmaps(preferences["pair_preference"][0])
+    plot_pair_heatmaps()
     plot_pair_graph(preferences["pair_preference"][0])

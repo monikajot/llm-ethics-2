@@ -5,6 +5,8 @@ import cohere
 import pandas as pd
 import random
 from openai import OpenAI
+from json.decoder import JSONDecodeError
+import json
 
 
 client = OpenAI()
@@ -196,6 +198,17 @@ def print_discard_rate(filename="mft_dataset_60-560.csv"):
     print(data["filtered_scores"].isna().sum())
     print(len(data[data["filtered_scores"] > 8]))
 
+
+def string_to_json(text):
+    try:
+        example_dict = json.loads(text)
+    except JSONDecodeError:
+        response = query_model("gpt-4o-mini", f"Can you format the following string to be JSON readable? The output must be ONLY plain text with the reformatted string. TEXT: {text}", "")
+        try:
+            example_dict = json.loads(response)
+        except JSONDecodeError:
+            return
+    return json.dumps(example_dict)
 
 if __name__ == "__main__":
     # generate_dataset_from_all_scenarions()

@@ -1,11 +1,10 @@
 import datetime as dt
 import itertools
+import random
 import time
 import ast
-import json
 from tqdm import tqdm
 
-from json.decoder import JSONDecodeError
 
 import pandas as pd
 
@@ -13,6 +12,9 @@ from constants import (
     single_evaluation_task,
     foundations,
     EXAMPLE1,
+    EXAMPLE2,
+    EXAMPLE3,
+    NEGATIVE_EVALUATION_RULES,
     MFT_EXPLANATION,
     TASK,
     RULES,
@@ -24,36 +26,38 @@ from constants import (
     LIBERTY,
     EVALUATION_RULES,
 )
-from functions import query_model, get_list_mean
+from functions import query_model, get_list_mean, string_to_json
 
-GENERATE_SCENARIO_TEXT = (
-    MFT_EXPLANATION
-    + CARE
-    + FAIRNESS
-    + LOYALTY
-    + AUTHORITY
-    + SANCTITY
-    + LIBERTY
-    + TASK
-    + RULES
-    # + " \n If something in the task is unclear, make sure to clarify it before answering"
-    # + "\n Do you understand the rules? Go through each rule, explain it back to me and say if you have any uncertainties or confusions about it. "
-    # + EXAMPLE1  # TODO: have more and randomly change them. specify only the keys and not vals
-)
+MODEL = "gpt-4o-mini"
+NUM_EXAMPLES = 10  # 20
 
-MODEL = "gpt-4o"
-NUM_EXAMPLES = 50  # 20
+def generate_scenario_text(example: bool, rules_clear_check: bool, mft_explanation: bool):
+    generate_scenario_text = MFT_EXPLANATION
+
+    if mft_explanation:
+        value_explanations = CARE + FAIRNESS + LOYALTY + AUTHORITY + SANCTITY + LIBERTY
+        generate_scenario_text += value_explanations
+
+    generate_scenario_text += TASK + RULES
+
+    if example:
+        generate_scenario_text += "\n\nEXAMPLE: " + random.sample([EXAMPLE1, EXAMPLE2, EXAMPLE3,], k=1)[0]
+    if rules_clear_check:
+        generate_scenario_text += "\n If something in the task is unclear, make sure to clarify it before answering"
+        generate_scenario_text += "\n Do you understand the rules? Go through each rule, explain it back to me and say if you have any uncertainties or confusions about it. "
+    return generate_scenario_text
 
 
-def generate_single_mft_scenario(verbose: bool = False):
-    response = query_model(MODEL, GENERATE_SCENARIO_TEXT, "")
+def generate_single_mft_scenario(example: bool, rules_clear_check: bool, mft_explanation: bool, verbose: bool = False):
+    prompt = generate_scenario_text(example, rules_clear_check, mft_explanation)
+    response = query_model(MODEL, prompt, "")
     if verbose:
-        print("GENERATE_SCENARIO_TEXT  -----> ", GENERATE_SCENARIO_TEXT + "\n")
+        print("GENERATE_SCENARIO_TEXT  -----> ", prompt + "\n")
         print("response   ----> ", response)
     return response
 
 
-def run_dataset_generation(output_filename=None, num_examples=NUM_EXAMPLES):
+def run_dataset_generation(example, rules_clear_check, mft_explanation, output_filename=None, num_examples=NUM_EXAMPLES, only_flag=""):
     start_time = time.time()
     if output_filename is None:
         output_filename = (
@@ -61,14 +65,14 @@ def run_dataset_generation(output_filename=None, num_examples=NUM_EXAMPLES):
         )
     responses = []
     responses_scores = []
-    score_dict = {rule: [] for rule in EVALUATION_RULES}
+    score_dict = {rule: [] for rule in EVALUATION_RULES + NEGATIVE_EVALUATION_RULES}
     for i in tqdm(range(num_examples)):
         # generate scenario
-        response = generate_single_mft_scenario()
+        response = generate_single_mft_scenario(example, rules_clear_check, mft_explanation)
         isinstance(response, dict)
 
         # evaluate scenario
-        scores, score_dict = evaluator(response, score_dict)
+        scores, score_dict = evaluator(response, score_dict, only_flag=only_flag)
         responses.append(response)
         responses_scores.append(scores)
         data_dict = {"responses": responses, "scores": responses_scores}
@@ -79,15 +83,25 @@ def run_dataset_generation(output_filename=None, num_examples=NUM_EXAMPLES):
     return data
 
 
-def evaluator(response: str, score_dict: dict, verbose: bool = False):
+def evaluator(response: str, score_dict: dict, only_flag: str, verbose: bool = False):
     evaluations = []
-    for eval_quest in EVALUATION_RULES:
-        task = single_evaluation_task(eval_quest, response)
+    for eval_quest in EVALUATION_RULES +NEGATIVE_EVALUATION_RULES:
+        task = single_evaluation_task(eval_quest, response, only_flag=only_flag)
         evaluation = query_model(MODEL, task, "")
-        if "1" in evaluation and "0" not in evaluation:
-            evaluation_score = 1
-        elif "0" in evaluation and "1" not in evaluation:
-            evaluation_score = 0
+        if eval_quest in EVALUATION_RULES:
+            if "1" in evaluation and "0" not in evaluation:
+                evaluation_score = 1
+            elif "0" in evaluation and "1" not in evaluation:
+                evaluation_score = 0
+            else:
+                evaluation_score = -1
+        elif eval_quest in NEGATIVE_EVALUATION_RULES:
+            if "1" in evaluation and "0" not in evaluation:
+                evaluation_score = 0
+            elif "0" in evaluation and "1" not in evaluation:
+                evaluation_score = 1
+            else:
+                evaluation_score = -1
         else:
             evaluation_score = -1
         score_dict[eval_quest].append(evaluation_score)
@@ -97,7 +111,7 @@ def evaluator(response: str, score_dict: dict, verbose: bool = False):
             print("%% PRINTED SINGLE EVALUATION Q")
             print(eval_quest)
             print()
-            print("%% EVALUATIION SCORE")
+            print("%% EVALUATION SCORE")
             print(evaluation_score)
             print()
             print("%% EVALUATION ")
@@ -132,13 +146,10 @@ def get_best_examples(input_filename: str, percent: int):
 
 
 def preprocess_scenario(example: str):
-    example = example.replace("'", "")
+    # example = example.replace("'", '"')
     example = example.replace("\n", "")
 
-    try:
-        example_dict = json.loads(example)
-    except JSONDecodeError:
-        return
+    example_dict = string_to_json(example)
 
     if isinstance(example_dict, dict):
         keys = [
@@ -150,8 +161,8 @@ def preprocess_scenario(example: str):
             "sanctity",
             "liberty",
         ]
-        if list(example_dict.keys()) == keys:
-            return example
+        if set(example_dict.keys()) == set(keys):
+            return example_dict
     return
 
 
@@ -160,7 +171,7 @@ def check_dataset_formatting(input_filename: str = None, data: pd.DataFrame = No
         data = pd.read_csv(input_filename, index_col=0)
     rows = []
     for row_idx in range(len(data)):
-        print(row_idx)
+        # print(row_idx)
         row = data["responses"].iloc[row_idx]
         row = preprocess_scenario(row)
         rows.append(row)
@@ -168,7 +179,7 @@ def check_dataset_formatting(input_filename: str = None, data: pd.DataFrame = No
     data_no_nans = data.dropna()
     reindexed_data = data_no_nans.reset_index(drop=True)
     # data drop nans
-    reindexed_data.to_csv("formatted_" + input_filename)
+    reindexed_data.to_csv("test_formatted_" + input_filename)
     return reindexed_data
 
 
@@ -183,7 +194,19 @@ if __name__ == "__main__":
     # response = generate_single_mft_scenario()
     # evaluator(response)
 
-    # run_dataset_generation()
-
+    name = "mft_generated_100_aug_22_gpt4mini_with_examples"
+    # print(generate_scenario_text(example=True, rules_clear_check=False, mft_explanation=True))
+    # generate data
+    # data = run_dataset_generation(output_filename=f"{name}.csv", num_examples=100, only_flag="ONLY", example=True, rules_clear_check=False, mft_explanation=True)
+    check_dataset_formatting(input_filename=f"{name}.csv")
+    # get_best_examples(input_filename=f"formatted_{name}.csv", percent=50)
     # get_best_examples(f, 10)
-    pass
+    # pass
+
+
+    # which model produces better scenarios and by how much?
+    # see if g4m and g4o evaluations are the same (what percentage of them agree?)
+
+    # can i improve preprompting to get better examples
+    # cost gpt4o ~5$, gpt4o ~15c
+
