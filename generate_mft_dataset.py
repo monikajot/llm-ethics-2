@@ -3,6 +3,7 @@ import itertools
 import random
 import time
 import ast
+import json
 from tqdm import tqdm
 
 
@@ -12,8 +13,9 @@ from constants import (
     single_evaluation_task,
     foundations,
     EXAMPLE1,
-    EXAMPLE2,
-    EXAMPLE3,
+    # EXAMPLE2,
+    # EXAMPLE3,
+    EXAMPLE4,
     NEGATIVE_EVALUATION_RULES,
     MFT_EXPLANATION,
     TASK,
@@ -28,7 +30,7 @@ from constants import (
 )
 from functions import query_model, get_list_mean, string_to_json
 
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-4o"
 NUM_EXAMPLES = 10  # 20
 
 def generate_scenario_text(example: bool, rules_clear_check: bool, mft_explanation: bool):
@@ -41,7 +43,7 @@ def generate_scenario_text(example: bool, rules_clear_check: bool, mft_explanati
     generate_scenario_text += TASK + RULES
 
     if example:
-        generate_scenario_text += "\n\nEXAMPLE: " + random.sample([EXAMPLE1, EXAMPLE2, EXAMPLE3,], k=1)[0]
+        generate_scenario_text += "\n\nEXAMPLE: " + json.dumps(random.sample([EXAMPLE1, EXAMPLE4], k=1)[0])
     if rules_clear_check:
         generate_scenario_text += "\n If something in the task is unclear, make sure to clarify it before answering"
         generate_scenario_text += "\n Do you understand the rules? Go through each rule, explain it back to me and say if you have any uncertainties or confusions about it. "
@@ -85,7 +87,7 @@ def run_dataset_generation(example, rules_clear_check, mft_explanation, output_f
 
 def evaluator(response: str, score_dict: dict, only_flag: str, verbose: bool = False):
     evaluations = []
-    for eval_quest in EVALUATION_RULES +NEGATIVE_EVALUATION_RULES:
+    for eval_quest in EVALUATION_RULES + NEGATIVE_EVALUATION_RULES:
         task = single_evaluation_task(eval_quest, response, only_flag=only_flag)
         evaluation = query_model(MODEL, task, "")
         if eval_quest in EVALUATION_RULES:
@@ -194,11 +196,11 @@ if __name__ == "__main__":
     # response = generate_single_mft_scenario()
     # evaluator(response)
 
-    name = "mft_generated_100_aug_22_gpt4mini_with_examples"
+    name = "mft_generated_100_aug_26_gpt4o_with_examples"
     # print(generate_scenario_text(example=True, rules_clear_check=False, mft_explanation=True))
     # generate data
-    # data = run_dataset_generation(output_filename=f"{name}.csv", num_examples=100, only_flag="ONLY", example=True, rules_clear_check=False, mft_explanation=True)
-    check_dataset_formatting(input_filename=f"{name}.csv")
+    data = run_dataset_generation(output_filename=f"{name}.csv", num_examples=100, only_flag="ONLY", example=True, rules_clear_check=False, mft_explanation=True)
+    # check_dataset_formatting(input_filename=f"{name}.csv")
     # get_best_examples(input_filename=f"formatted_{name}.csv", percent=50)
     # get_best_examples(f, 10)
     # pass

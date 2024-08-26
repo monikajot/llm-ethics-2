@@ -53,5 +53,6 @@ def dataset_hist(filename="mft_generated_100_examples_aug_19.csv"):
 
 
 if __name__ == "__main__":
-   generated_data_evaluation_value_counts(filename="mft_generated_10_aug_22_gpt4m_with_examples.csv")
-   dataset_hist(filename="mft_generated_10_aug_22_gpt4m_with_examples.csv")
+   generated_data_evaluation_value_counts(filename="mft_generated_100_aug_22_gpt4mini_with_examples.csv")
+   # generated_data_evaluation_value_counts(filename="mft_generated_100_examples_aug_21_gpt4_3.csv")
+   # dataset_hist(filename="mft_generated_100_aug_22_gpt4mini_with_examples/.csv")

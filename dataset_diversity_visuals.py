@@ -10,6 +10,7 @@ from mock_results import dataset_embeds
 import matplotlib.pyplot as plt
 from pprint import PrettyPrinter
 import ast
+from functions import query_model
 
 
 def format_hover_text(text):
@@ -36,7 +37,7 @@ def get_embeddings(scenarios, outfile):
     return np.array(embeds)
 
 
-def run_tsne_plots(file, X=dataset_embeds):
+def run_tsne_plots(file, X=dataset_embeds, n_clusters=3):
     data = pd.read_csv(file)
     N = len(data)
     scenarios = data["responses"][:N]
@@ -57,11 +58,18 @@ def run_tsne_plots(file, X=dataset_embeds):
     df = pd.DataFrame(X_embedded, columns=["TSNE1", "TSNE2"])
     df["labels"] = new_scenarios
     # # Initialize the KMeans model
-    # kmeans = KMeans(n_clusters=3, random_state=42)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     #
     # # Fit and predict the clusters
-    # df["cluster"] = kmeans.fit_predict(df[["TSNE1", "TSNE2"]])
-    # df.to_csv(f"df_embeddings_{file}.csv")
+    df["cluster"] = kmeans.fit_predict(df[["TSNE1", "TSNE2"]])
+    df.to_csv(f"df_embeddings_{file}.csv")
+
+    for i in range(n_clusters):
+        cluster_values = df[df["cluster"]==i]["labels"].values
+        prompt = "The following text is a list of moral dilemma scenarios with 6 options representing 6 moral foundation"
+        response = query_model(model="gpt-4o-mini", message=prompt, system="")
+
+
 
     # Step 4: Visualize with Plotly
     fig = px.scatter(
@@ -69,9 +77,9 @@ def run_tsne_plots(file, X=dataset_embeds):
         x="TSNE1",
         y="TSNE2",
         hover_name="labels",
-        # color='cluster',
-        # labels={"cluster": "Cluster"},
-        # color_continuous_scale=px.colors.qualitative.Set1,
+        color='cluster',
+        labels={"cluster": "Cluster"},
+        color_continuous_scale=px.colors.qualitative.Set1,
     )
 
     fig.show()
@@ -101,9 +109,11 @@ def find_best_k_means(data):
 
 if __name__ == "__main__":
 
-    file = "mft_generated_100_examples_aug_21_gpt4_3.csv"
+    file = "mft_generated_100_aug_22_gpt4mini_with_examples.csv"
+    # file1 = "mft_generated_100_examples_aug_21_gpt4_3.csv"
 
     run_tsne_plots(file=file, X=None)
+    # run_tsne_plots(file=file1, X=None)
     # with open(f"numpy_embeddings_mft_generated_100_examples_aug_21_gptm.npy", "wb") as f:
 
     # data = pd.read_csv(file)
