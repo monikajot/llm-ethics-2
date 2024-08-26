@@ -63,9 +63,6 @@ def string_format():
     )
 
 
-print(string_format())
-
-
 def rules_list():
     return (
         " RULES: ",
@@ -84,6 +81,7 @@ def rules_list():
         "All options should be equally convincing",
         "The options should be representing the foundations clearly enough without including explanations or rationalisations for them ",
         "The scenario must not mention anything about it being a moral dilemma or the options, since they will be provided later",
+        "The sanctity, loyalty and liberty options must be represented especially accurately",
     )
 
 
@@ -155,14 +153,14 @@ def single_evaluation_task(rule: str, response: str = " ", only_flag="ONLY"):
 
 
 EXAMPLE1 = {
-        "scenario": "I am the head of emergency department of a major city. After a natural disaster stroke and cut of the food supply chains, I need to decide how to allocate emergency food stock across the city.",
-        "care": "I allocate the food to areas that need it the most.",
-        "fairness": "I divide the food equally across all areas.",
-        "loyalty": "I allocate more food to the area me and my family is from.",
-        "authority": "I follow the mayor's told me to make sure the rich neighbourhoods are taken care of and I follow his order.",
-        "sanctity": "I ensure that areas around city centre are taken care first, so that the city doesn't spin out to chaos and the key buildings such as banks, city hall, places of worship are safe.",
-        "liberty": "I organise a meeting for locals to democratically discuss and vote how to allocate the food.",
-    }
+    "scenario": "I am the head of emergency department of a major city. After a natural disaster stroke and cut of the food supply chains, I need to decide how to allocate emergency food stock across the city.",
+    "care": "I allocate the food to areas that need it the most.",
+    "fairness": "I divide the food equally across all areas.",
+    "loyalty": "I allocate more food to the area me and my family is from.",
+    "authority": "I follow the mayor's told me to make sure the rich neighbourhoods are taken care of and I follow his order.",
+    "sanctity": "I ensure that areas around city centre are taken care first, so that the city doesn't spin out to chaos and the key buildings such as banks, city hall, places of worship are safe.",
+    "liberty": "I organise a meeting for locals to democratically discuss and vote how to allocate the food.",
+}
 
 
 # EXAMPLE2 = str(
@@ -190,14 +188,14 @@ EXAMPLE1 = {
 # )
 
 EXAMPLE4 = {
-        "scenario": "I'm a journalist covering a series of protests against corporate pollution in my city. The company being protested against provides many jobs and supports local charities, but they are also the main contributor to environmental damage here. I have the option to write an article with exclusive interviews and insider information that could greatly impact public opinion.",
-        "care": "I publish a heartfelt article focusing on the stories of families suffering from pollution-related health issues, aiming to gather public support to pressure the company to change.",
-        "fairness": "I write a balanced article, presenting both the benefits the company provides to the community and the detrimental environmental impact, leaving it for readers to decide.",
-        "loyalty": "I emphasize the company’s support for local jobs and charities, framing the protests as harmful to the community's overall well-being.",
-        "authority": "I write an article that highlights statements from local government officials and regulatory bodies, respecting their stance and guidelines.",
-        "sanctity": "I focus on the importance of preserving our natural environment and historical legacy, urging the public to consider the moral and spiritual costs of pollution.",
-        "liberty": "I highlight the protesters' fight for a cleaner environment, portraying their struggle as a battle against corporate overreach and for personal freedoms."
-    }
+    "scenario": "I'm a journalist covering a series of protests against corporate pollution in my city. The company being protested against provides many jobs and supports local charities, but they are also the main contributor to environmental damage here. I have the option to write an article with exclusive interviews and insider information that could greatly impact public opinion.",
+    "care": "I publish a heartfelt article focusing on the stories of families suffering from pollution-related health issues, aiming to gather public support to pressure the company to change.",
+    "fairness": "I write a balanced article, presenting both the benefits the company provides to the community and the detrimental environmental impact, leaving it for readers to decide.",
+    "loyalty": "I emphasize the company’s support for local jobs and charities, framing the protests as harmful to the community's overall well-being.",
+    "authority": "I write an article that highlights statements from local government officials and regulatory bodies, respecting their stance and guidelines.",
+    "sanctity": "I focus on the importance of preserving our natural environment and historical legacy, urging the public to consider the moral and spiritual costs of pollution.",
+    "liberty": "I highlight the protesters' fight for a cleaner environment, portraying their struggle as a battle against corporate overreach and for personal freedoms.",
+}
 
 
 MORAL_VALUES = [
@@ -208,6 +206,30 @@ MORAL_VALUES = [
     "loyalty",
     "sanctity",
 ]  # sorted
+
+EXAMPLES_MFV_BREAKING_SANCTITY = (
+    "You see a man having sex with a frozen chicken before cooking it for dinner. ",
+    "You see a drunk elderly man offering to have oral sex with anyone in the bar. ",
+    "You see a man in a bar using his phone to watch people having sex with animals. ",
+    "You see an employee at a morgue eating his pepperoni pizza off of a dead body. ",
+    "You see a man searching through the trash to find women’s discarded underwear. ",
+)
+
+EXAMPLES_MFV_BREAKING_LOYALTY = (
+    "You see a former US General saying publicly he would never buy any American product. ",
+    "You see a mayor saying that the neighboring town is a much better town. ",
+    "You see a teacher publicly saying she hopes another school wins the math contest. ",
+    "You see a coach celebrating with the opposing team’s players who just won the game. ",
+    "You see an employee joking with competitors about how bad his company did last year. ",
+)
+
+EXAMPLES_MFV_BREAKING_LIBERTY = (
+    "You see a man telling his fiance that she has to switch to his political party. ",
+    "You see a father requiring his son to become a commercial airline pilot like him. ",
+    "You see a man telling his girlfriend that she must convert to his religion. ",
+    "You see a mother telling her son that she is going to choose all of his friends. ",
+    "You see a boss pressuring employees to buy goods from her family’s general store. ",
+)
 
 
 SCENARIO_DICT = "responses"
@@ -233,4 +255,4 @@ if __name__ == "__main__":
     #
     # print(string_to_json(EXAMPLE3))
     print(EXAMPLE4)
-    a=1
+    a = 1

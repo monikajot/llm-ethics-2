@@ -225,7 +225,7 @@ class Evaluations:
         data = pd.read_csv(input_filename, index_col=0)
         print(len(data))
 
-         # ["gpt-3.5", "gpt-4o-mini"]
+        # ["gpt-3.5", "gpt-4o-mini"]
         preferences = {
             SINGLE_PREFERENCE: [],
             PAIR_PREFERENCE: [],
@@ -301,9 +301,8 @@ def save_pickle(obj: dict, filename: str):
 if __name__ == "__main__":
 
     eval = Evaluations(eval_models=["gpt-3.5"])
-    eval.evals(input_filename="formatted_mft_dataset.csv")
-    filename = "PREFERENCES"
+    eval.evals(input_filename="combined_6_files.csv")
+    filename = "PREFERENCES+temp"
     with open(f"{filename}.pkl", "rb") as f:
         data = pickle.load(f)
         print(data)
-        a = 1

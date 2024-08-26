@@ -1,7 +1,11 @@
 import pickle
 
 from visualize_results import plot_pair_graph, plot_pair_heatmaps
-from generate_mft_dataset import run_dataset_generation, check_dataset_formatting, get_best_examples
+from generate_mft_dataset import (
+    run_dataset_generation,
+    check_dataset_formatting,
+    get_best_examples,
+)
 from evaluate_models import Evaluations
 
 
@@ -26,10 +30,7 @@ def run_evals():
 
     # check inconsistencies
 
-
-
     # check variance
-
 
 
 if __name__ == "__main__":

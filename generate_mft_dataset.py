@@ -5,6 +5,7 @@ import time
 import ast
 import json
 from tqdm import tqdm
+from typing import Optional
 
 
 import pandas as pd
@@ -16,6 +17,7 @@ from constants import (
     # EXAMPLE2,
     # EXAMPLE3,
     EXAMPLE4,
+    EXAMPLES_MFV_BREAKING_SANCTITY,
     NEGATIVE_EVALUATION_RULES,
     MFT_EXPLANATION,
     TASK,
@@ -33,9 +35,11 @@ from functions import query_model, get_list_mean, string_to_json
 MODEL = "gpt-4o"
 NUM_EXAMPLES = 10  # 20
 
-def generate_scenario_text(example: bool, rules_clear_check: bool, mft_explanation: bool):
-    generate_scenario_text = MFT_EXPLANATION
 
+def generate_scenario_text(
+    example: bool, rules_clear_check: bool, mft_explanation: bool, mfv_examples: bool, previous_example_str: Optional[str]
+):
+    generate_scenario_text = MFT_EXPLANATION
     if mft_explanation:
         value_explanations = CARE + FAIRNESS + LOYALTY + AUTHORITY + SANCTITY + LIBERTY
         generate_scenario_text += value_explanations
@@ -43,15 +47,44 @@ def generate_scenario_text(example: bool, rules_clear_check: bool, mft_explanati
     generate_scenario_text += TASK + RULES
 
     if example:
-        generate_scenario_text += "\n\nEXAMPLE: " + json.dumps(random.sample([EXAMPLE1, EXAMPLE4], k=1)[0])
+        generate_scenario_text += "\n\nEXAMPLE: " + json.dumps(
+            random.sample([EXAMPLE1, EXAMPLE4], k=1)[0]
+        )
+    if mfv_examples:
+        generate_scenario_text += "\n\nSome examples from moral foundations vignettes. Notice these statements are negative examples of the moral faoundation, whereas we only care about positive examples: "
+        generate_scenario_text += "\nSanctity: " + "".join(
+            [
+                "\n" + str(i) + ". " + val
+                for i, val in enumerate(EXAMPLES_MFV_BREAKING_SANCTITY)
+            ]
+        )
     if rules_clear_check:
         generate_scenario_text += "\n If something in the task is unclear, make sure to clarify it before answering"
-        generate_scenario_text += "\n Do you understand the rules? Go through each rule, explain it back to me and say if you have any uncertainties or confusions about it. "
+        generate_scenario_text += "\n Do you understand the rules? Go through each rule, explain it back to me and say if you have any uncertainties or confusions about it "
+    if previous_example_str:
+        generate_scenario_text += previous_example_str
     return generate_scenario_text
 
 
-def generate_single_mft_scenario(example: bool, rules_clear_check: bool, mft_explanation: bool, verbose: bool = False):
-    prompt = generate_scenario_text(example, rules_clear_check, mft_explanation)
+def generate_single_mft_scenario(
+    example: bool,
+    rules_clear_check: bool,
+    mft_explanation: bool,
+    mfv_examples: bool,
+    previous_examples: bool,
+    verbose: bool = True,
+):
+    previous_example_str = None
+    if previous_examples:
+        data = pd.read_csv("previous_examples.csv", index_col=0)
+        row_idx = random.sample(list(range(len(data))), 5)
+        previous_examples_vals = data["responses"].iloc[row_idx]
+        previous_examples_scores = [str(sum(ast.literal_eval(val))) for val in data["scores"].iloc[row_idx]]
+        previous_example_str = "\n\nThese are previously generated examples with their scores (max score 19). The generated example must be different from the ones already generated:"
+        previous_example_str += "".join(["\n" + example + " EXAMPLE SCORE: " + previous_examples_scores[i] for i, example in enumerate(previous_examples_vals)])
+    prompt = generate_scenario_text(
+        example, rules_clear_check, mft_explanation, mfv_examples, previous_example_str
+    )
     response = query_model(MODEL, prompt, "")
     if verbose:
         print("GENERATE_SCENARIO_TEXT  -----> ", prompt + "\n")
@@ -59,7 +92,16 @@ def generate_single_mft_scenario(example: bool, rules_clear_check: bool, mft_exp
     return response
 
 
-def run_dataset_generation(example, rules_clear_check, mft_explanation, output_filename=None, num_examples=NUM_EXAMPLES, only_flag=""):
+def run_dataset_generation(
+    example,
+    rules_clear_check,
+    mft_explanation,
+    mfv_examples,
+    previous_examples: bool,
+    output_filename=None,
+    num_examples=NUM_EXAMPLES,
+    only_flag="",
+):
     start_time = time.time()
     if output_filename is None:
         output_filename = (
@@ -68,9 +110,11 @@ def run_dataset_generation(example, rules_clear_check, mft_explanation, output_f
     responses = []
     responses_scores = []
     score_dict = {rule: [] for rule in EVALUATION_RULES + NEGATIVE_EVALUATION_RULES}
-    for i in tqdm(range(num_examples)):
+    for _ in tqdm(range(num_examples)):
         # generate scenario
-        response = generate_single_mft_scenario(example, rules_clear_check, mft_explanation)
+        response = generate_single_mft_scenario(
+            example, rules_clear_check, mft_explanation, mfv_examples, previous_examples
+        )
         isinstance(response, dict)
 
         # evaluate scenario
@@ -126,7 +170,6 @@ def scored_datasets_with_means(filename: str):
     """Append a column of TRUE/FALSE if the scenario is good enough or not"""
     data = pd.read_csv(filename, index_col=0)
     # invert qs
-
     means = data["scores"].apply(get_list_mean)
     good_list = []
     for mean in means:
@@ -168,20 +211,22 @@ def preprocess_scenario(example: str):
     return
 
 
-def check_dataset_formatting(input_filename: str = None, data: pd.DataFrame = None):
+def check_dataset_formatting(input_filename: str = None, data: pd.DataFrame = None, save=True):
     if input_filename:
         data = pd.read_csv(input_filename, index_col=0)
     rows = []
-    for row_idx in range(len(data)):
+    for row_idx in tqdm(range(len(data))):
         # print(row_idx)
         row = data["responses"].iloc[row_idx]
         row = preprocess_scenario(row)
-        rows.append(row)
+        rows.append(json.dumps(row))
     data["responses"] = pd.Series(rows)
     data_no_nans = data.dropna()
     reindexed_data = data_no_nans.reset_index(drop=True)
     # data drop nans
-    reindexed_data.to_csv("test_formatted_" + input_filename)
+    if save:
+        output_file = "test_formatted_" + input_filename
+        reindexed_data.to_csv( output_file)
     return reindexed_data
 
 
@@ -193,22 +238,26 @@ def run():
 
 
 if __name__ == "__main__":
-    # response = generate_single_mft_scenario()
+    # response = generate_single_mft_scenario(example=True, rules_clear_check=False, mft_explanation=True, mfv_examples=False, previous_examples=True)
+    # print(response)
     # evaluator(response)
 
-    name = "mft_generated_100_aug_26_gpt4o_with_examples"
-    # print(generate_scenario_text(example=True, rules_clear_check=False, mft_explanation=True))
+    name = "test_formatted_mft_generated_100_aug_26_gpt4o_with_examples_sanc_loya_lib_emph.csv"
+    # name1 = "test_formatted_mft_generated_100_aug_26_gpt4o_with_examples_sanctity_emph_2.csv"
+    # print(generate_scenario_text(example=True, rules_clear_check=False, mft_explanation=True, mfv_examples=True))
     # generate data
-    data = run_dataset_generation(output_filename=f"{name}.csv", num_examples=100, only_flag="ONLY", example=True, rules_clear_check=False, mft_explanation=True)
+    # data = run_dataset_generation(output_filename=f"{name}.csv", num_examples=100, only_flag="ONLY", example=True, rules_clear_check=False, mft_explanation=True, mfv_examples=False, previous_examples=False)
     # check_dataset_formatting(input_filename=f"{name}.csv")
+    data = pd.read_csv(name, index_col=0)
+    data_no_nans = data.dropna()
+    reindexed_data = data_no_nans.reset_index(drop=True)
+    reindexed_data.to_csv("no_nans"+ name)
     # get_best_examples(input_filename=f"formatted_{name}.csv", percent=50)
     # get_best_examples(f, 10)
     # pass
-
 
     # which model produces better scenarios and by how much?
     # see if g4m and g4o evaluations are the same (what percentage of them agree?)
 
     # can i improve preprompting to get better examples
     # cost gpt4o ~5$, gpt4o ~15c
-

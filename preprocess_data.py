@@ -67,18 +67,11 @@ def run():
     fixed_data.to_csv("preprocessed_data_again.csv")
 
 
-def combine_csv_files(file1, file2, new_file):
-    df1 = pd.read_csv(file1, index_col=0)
-    df2 = pd.read_csv(file2, index_col=0)
-    combined_df = pd.concat([df1, df2])
-    df = combined_df.reset_index()
-    df.to_csv(new_file, index=False)
-
 
 if __name__ == "__main__":
     f1 = "mft_generated_100_examples_aug_21_gpt4.csv"
     f2 = "mft_generated_100_examples_aug_21_gpt4_2.csv"
-    combine_csv_files(f1, f2, "mft_generated_100_examples_aug_21_gpt4_3.csv")
+    # combine_csv_files(f1, f2, "mft_generated_100_examples_aug_21_gpt4_3.csv")
 
 
 # good_data = pd.read_csv("processed_datasets/data_fixed_syntax.csv", index_col=0)

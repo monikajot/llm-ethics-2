@@ -33,7 +33,7 @@ def get_embeddings(scenarios, outfile):
         print(response.data[0].embedding)
 
     X = np.array(embeds)
-    np.save(file=f"numpy_embeddings_{outfile}.npy",arr= X)
+    np.save(file=f"numpy_embeddings_{outfile}.npy", arr=X)
     return np.array(embeds)
 
 
@@ -58,18 +58,16 @@ def run_tsne_plots(file, X=dataset_embeds, n_clusters=3):
     df = pd.DataFrame(X_embedded, columns=["TSNE1", "TSNE2"])
     df["labels"] = new_scenarios
     # # Initialize the KMeans model
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    # kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    # #
+    # # # Fit and predict the clusters
+    # df["cluster"] = kmeans.fit_predict(df[["TSNE1", "TSNE2"]])
+    # df.to_csv(f"df_embeddings_{file}.csv")
     #
-    # # Fit and predict the clusters
-    df["cluster"] = kmeans.fit_predict(df[["TSNE1", "TSNE2"]])
-    df.to_csv(f"df_embeddings_{file}.csv")
-
-    for i in range(n_clusters):
-        cluster_values = df[df["cluster"]==i]["labels"].values
-        prompt = "The following text is a list of moral dilemma scenarios with 6 options representing 6 moral foundation"
-        response = query_model(model="gpt-4o-mini", message=prompt, system="")
-
-
+    # for i in range(n_clusters):
+    #     cluster_values = df[df["cluster"] == i]["labels"].values
+    #     prompt = "The following text is a list of moral dilemma scenarios with 6 options representing 6 moral foundation"
+    #     response = query_model(model="gpt-4o-mini", message=prompt, system="")
 
     # Step 4: Visualize with Plotly
     fig = px.scatter(
@@ -77,12 +75,13 @@ def run_tsne_plots(file, X=dataset_embeds, n_clusters=3):
         x="TSNE1",
         y="TSNE2",
         hover_name="labels",
-        color='cluster',
-        labels={"cluster": "Cluster"},
-        color_continuous_scale=px.colors.qualitative.Set1,
+        # color="cluster",
+        # labels={"cluster": "Cluster"},
+        # color_continuous_scale=px.colors.qualitative.Set1,
     )
 
     fig.show()
+
 
 def find_best_k_means(data):
     # Define the range of k values to try
@@ -99,17 +98,17 @@ def find_best_k_means(data):
 
     # Plot the Elbow Curve
     plt.figure(figsize=(8, 5))
-    plt.plot(k_values, inertia_values, 'bo-', markersize=8)
-    plt.xlabel('Number of clusters (k)')
-    plt.ylabel('Inertia (WCSS)')
-    plt.title('Elbow Method For Optimal k')
+    plt.plot(k_values, inertia_values, "bo-", markersize=8)
+    plt.xlabel("Number of clusters (k)")
+    plt.ylabel("Inertia (WCSS)")
+    plt.title("Elbow Method For Optimal k")
     plt.grid(True)
     plt.show()
 
 
 if __name__ == "__main__":
 
-    file = "mft_generated_100_aug_22_gpt4mini_with_examples.csv"
+    file = "combined_7_files.csv"
     # file1 = "mft_generated_100_examples_aug_21_gpt4_3.csv"
 
     run_tsne_plots(file=file, X=None)

@@ -7,7 +7,7 @@ import random
 from openai import OpenAI
 from json.decoder import JSONDecodeError
 import json
-
+from typing import Optional
 
 client = OpenAI()
 co = cohere.Client(os.environ.get("CO_API_KEY"))
@@ -199,16 +199,29 @@ def print_discard_rate(filename="mft_dataset_60-560.csv"):
     print(len(data[data["filtered_scores"] > 8]))
 
 
-def string_to_json(text):
+def string_to_json(text) -> Optional[dict]:
     try:
         example_dict = json.loads(text)
     except JSONDecodeError:
-        response = query_model("gpt-4o-mini", f"Can you format the following string to be JSON readable? The output must be ONLY plain text with the reformatted string. TEXT: {text}", "")
+        response = query_model(
+            "gpt-4o-mini",
+            f"Can you format the following string to be in JSON format? The output must be ONLY plain text with the reformatted string. TEXT: {text}",
+            "",
+        )
         try:
             example_dict = json.loads(response)
         except JSONDecodeError:
             return
-    return json.dumps(example_dict)
+    return example_dict
+
+
+def combine_csv_files(file1, file2, new_file):
+    df1 = pd.read_csv(file1, index_col=0)
+    df2 = pd.read_csv(file2, index_col=0)
+    combined_df = pd.concat([df1, df2])
+    df = combined_df.reset_index()
+    df.to_csv(new_file, index=False)
+
 
 if __name__ == "__main__":
     # generate_dataset_from_all_scenarions()

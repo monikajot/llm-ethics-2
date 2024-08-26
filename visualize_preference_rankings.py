@@ -52,12 +52,14 @@ def plot_single_graph(edges, node_coords, output_filename="single_graph.png"):
     plt.close()
     # ax.figure.savefig(output_filename)
 
+
 def get_counts(new_dict):
     # get the number of edges that are pointing to a value
     counts = {val: 0 for val in MORAL_VALUES}
     for _, key in new_dict.keys():
         counts[key] += 1
     return counts
+
 
 def create_edges(pair_preferences):
     new_dict = {}
