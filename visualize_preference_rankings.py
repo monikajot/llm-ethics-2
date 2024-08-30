@@ -6,7 +6,7 @@ import seaborn as sns
 import pickle
 
 from constants import MORAL_VALUES
-from mock_results import pair_preference
+from mock_results import pair_preference, pair_preference_gpt_4o, gpt_4o_sp, gpt_4o_tp
 
 OPTIONS = {
     "font_size": 8,
@@ -107,10 +107,28 @@ def plot_pair_heatmaps(
     fig.savefig(output_filename)
     plt.close()
 
+def plot_preference_matrix_heatmap(preference_matrix):
+    fig = plt.figure(figsize=(10, 8))
+    sns.heatmap(
+        preference_matrix,
+        annot=True,
+        fmt="g",
+        cmap="YlGnBu",
+        cbar_kws={"label": "Value"},
+    )
+
+    # Set the title and labels
+    plt.title("Heatmap of Values")
+    plt.xlabel("Preferred values")
+    plt.ylabel("Over values")
+
+    plt.show()
 
 if __name__ == "__main__":
-    with open(f"PREFERENCES.pkl", "rb") as f:
-        preferences = pickle.load(f)
+    # with open(f"PREFERENCES.pkl", "rb") as f:
+    #     preferences = pickle.load(f)
     # print(preferences["pair_preference"][0])
-    plot_pair_heatmaps()
-    plot_pair_graph(preferences["pair_preference"][0])
+    # plot_preference_matrix_heatmap()
+    # plot_pair_graph(pair_preference_gpt_4o)
+
+    plot_single_graph(edges)

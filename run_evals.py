@@ -1,6 +1,7 @@
 import pickle
+import pandas as pd
 
-from visualize_results import plot_pair_graph, plot_pair_heatmaps
+# from visualize_results import plot_pair_graph, plot_pair_heatmaps
 from generate_mft_dataset import (
     run_dataset_generation,
     check_dataset_formatting,
@@ -25,8 +26,8 @@ def run_evals():
     with open(f"PREFERENCES.pkl", "rb") as f:
         preferences = pickle.load(f)
     # print(preferences["pair_preference"][0])
-    plot_pair_heatmaps(preferences["pair_preference"][0])
-    plot_pair_graph(preferences["pair_preference"][0])
+    # plot_pair_heatmaps(preferences["pair_preference"][0])
+    # plot_pair_graph(preferences["pair_preference"][0])
 
     # check inconsistencies
 
@@ -34,4 +35,23 @@ def run_evals():
 
 
 if __name__ == "__main__":
-    run_evals()
+    model = "claude-3"
+    file = "half_final_data_27d_21h.csv"
+
+    outfile = f"PAIR_PREFERENCES_{model}"
+
+    eval = Evaluations(eval_models=[model])
+    eval.evals(input_filename=file, outfile=outfile, pp=True)
+    with open(f"{outfile}.pkl", "rb") as f:
+        data = pickle.load(f)
+        print(data)
+
+    # for model in models:
+    outfile = f"Triple_PREFERENCES_{model}"
+
+    eval = Evaluations(eval_models=[model])
+    eval.evals(input_filename=file, outfile=outfile, trp=True)
+    with open(f"{outfile}.pkl", "rb") as f:
+        data = pickle.load(f)
+        print(data)
+    # run_evals()

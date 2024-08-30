@@ -1,3 +1,4 @@
+anthropic==0.34.1
 cohere==5.8.1
 matplotlib==3.9.2
 networkx==3.3
@@ -6,5 +7,6 @@ openai==1.42.0
 pandas==2.2.2
 plotly==5.23.0
 scikit_learn==1.5.1
+scipy==1.14.1
 seaborn==0.13.2
 tqdm==4.66.4

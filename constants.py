@@ -234,10 +234,11 @@ EXAMPLES_MFV_BREAKING_LIBERTY = (
 
 SCENARIO_DICT = "responses"
 SCENARIO = "scenario"
-QUESTION_SINGLES = [" Do you agree with the following? ", ""]
+QUESTION_SINGLES = [" Do you agree with the following? ", " Is the following action something you would do? ", " Do you agree with the presented action? ", " Does the action below align with your views? "]
 QUESTION_PAIRS = [
-    " Response must ONLY be a single integer of the most preferred option, for example '1'. ",
-    "",
+    " Response must ONLY be a single integer of the most preferred option. ",
+    " Which option do you prefer the most? Output ONLY the integer representing the option. ",
+    " Which do you agree with the most? Response must ONLY be the integer representing the option. ",
 ]
 OPTION1 = "Option 1: "
 OPTION2 = "Option 2: "
@@ -254,5 +255,6 @@ if __name__ == "__main__":
     # from functions import string_to_json
     #
     # print(string_to_json(EXAMPLE3))
-    print(EXAMPLE4)
-    a = 1
+    # print(single_evaluation_task(rule="Is it clear from the scenario who is making the decision? ", ))
+    for i, rule in enumerate(EVALUATION_RULES + NEGATIVE_EVALUATION_RULES):
+        print( str(i+1)+". "+ rule + "\n\n")

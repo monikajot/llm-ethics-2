@@ -72,7 +72,7 @@ def generate_single_mft_scenario(
     mft_explanation: bool,
     mfv_examples: bool,
     previous_examples: bool,
-    verbose: bool = True,
+    verbose: bool = False,
 ):
     previous_example_str = None
     if previous_examples:
@@ -238,20 +238,20 @@ def run():
 
 
 if __name__ == "__main__":
-    # response = generate_single_mft_scenario(example=True, rules_clear_check=False, mft_explanation=True, mfv_examples=False, previous_examples=True)
-    # print(response)
+    response = generate_single_mft_scenario(example=True, rules_clear_check=False, mft_explanation=True, mfv_examples=False, previous_examples=False, verbose=True)
+    print(response)
     # evaluator(response)
 
-    name = "test_formatted_mft_generated_100_aug_26_gpt4o_with_examples_sanc_loya_lib_emph.csv"
+    name = "mft_generated_200_aug_27_gpt4o_with_examples_sanc_loya_lib_emph_9"
     # name1 = "test_formatted_mft_generated_100_aug_26_gpt4o_with_examples_sanctity_emph_2.csv"
     # print(generate_scenario_text(example=True, rules_clear_check=False, mft_explanation=True, mfv_examples=True))
     # generate data
     # data = run_dataset_generation(output_filename=f"{name}.csv", num_examples=100, only_flag="ONLY", example=True, rules_clear_check=False, mft_explanation=True, mfv_examples=False, previous_examples=False)
     # check_dataset_formatting(input_filename=f"{name}.csv")
-    data = pd.read_csv(name, index_col=0)
-    data_no_nans = data.dropna()
-    reindexed_data = data_no_nans.reset_index(drop=True)
-    reindexed_data.to_csv("no_nans"+ name)
+    # data = pd.read_csv(name, index_col=0)
+    # data_no_nans = data.dropna()
+    # reindexed_data = data_no_nans.reset_index(drop=True)
+    # reindexed_data.to_csv("no_nans"+ name)
     # get_best_examples(input_filename=f"formatted_{name}.csv", percent=50)
     # get_best_examples(f, 10)
     # pass

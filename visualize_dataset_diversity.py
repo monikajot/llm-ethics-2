@@ -58,28 +58,48 @@ def run_tsne_plots(file, X=dataset_embeds, n_clusters=3):
     df = pd.DataFrame(X_embedded, columns=["TSNE1", "TSNE2"])
     df["labels"] = new_scenarios
     # # Initialize the KMeans model
-    # kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    # #
-    # # # Fit and predict the clusters
-    # df["cluster"] = kmeans.fit_predict(df[["TSNE1", "TSNE2"]])
-    # df.to_csv(f"df_embeddings_{file}.csv")
-    #
-    # for i in range(n_clusters):
-    #     cluster_values = df[df["cluster"] == i]["labels"].values
-    #     prompt = "The following text is a list of moral dilemma scenarios with 6 options representing 6 moral foundation"
-    #     response = query_model(model="gpt-4o-mini", message=prompt, system="")
+    if n_clusters > 1:
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        #
+        # # Fit and predict the clusters
+        df["cluster"] = kmeans.fit_predict(df[["TSNE1", "TSNE2"]])
+        keywords = [""] * len(df)
 
-    # Step 4: Visualize with Plotly
-    fig = px.scatter(
-        df,
-        x="TSNE1",
-        y="TSNE2",
-        hover_name="labels",
-        # color="cluster",
-        # labels={"cluster": "Cluster"},
-        # color_continuous_scale=px.colors.qualitative.Set1,
-    )
+        if X is None:
+            df.to_csv(f"df_embeddings_{file}.csv")
 
+        for i in range(n_clusters):
+            cluster_values = df[df["cluster"] == i]["labels"].values
+            scenarios = []
+            for val in cluster_values:
+                try:
+                    scenarios.append(json.loads(val)["scenario"])
+                except json.decoder.JSONDecodeError:
+                    continue
+            prompt = f"The following text is a list of Moral Foundations Theory moral dilemma scenarios with 6 options representing 6 moral foundation. Summarize the moral dilemma text in 5 unique keywords that best describe its contents and output format is 'word, word, word, word, word'. The words must represent the text itself and not the format or the moral values. \n\n {scenarios}"
+            response = query_model(model="gpt-4o-mini", message=prompt, system="")
+            keywords[df[df["cluster"] == i].index[0]] = response
+            a=1
+        df["keywords"] = keywords
+        # Step 4: Visualize with Plotly
+        fig = px.scatter(
+            df,
+            x="TSNE1",
+            y="TSNE2",
+            hover_name="labels",
+            color="cluster",
+            labels={"cluster": "Cluster"},
+            color_continuous_scale=px.colors.qualitative.Set1,
+            text="keywords"
+        )
+    else:
+        # Step 4: Visualize with Plotly
+        fig = px.scatter(
+            df,
+            x="TSNE1",
+            y="TSNE2",
+            hover_name="labels",
+        )
     fig.show()
 
 
@@ -108,10 +128,12 @@ def find_best_k_means(data):
 
 if __name__ == "__main__":
 
-    file = "combined_7_files.csv"
+    file = "final_data_27d_21h.csv"
     # file1 = "mft_generated_100_examples_aug_21_gpt4_3.csv"
+    # embs = "numpy_embeddings_final_data_27d_16h.npy"
+    # X = np.load(embs)
 
-    run_tsne_plots(file=file, X=None)
+    run_tsne_plots(file=file, X=None, n_clusters=30)
     # run_tsne_plots(file=file1, X=None)
     # with open(f"numpy_embeddings_mft_generated_100_examples_aug_21_gptm.npy", "wb") as f:
 

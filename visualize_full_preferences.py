@@ -1,46 +1,54 @@
 import plotly.graph_objects as go
 from constants import MORAL_VALUES
+from mock_results import single_preference_var, single_preferences_dict, total_preference_dict
 
+colors = {
+    "GPT-3.5": 'rgb(236,36,0)',
+    "GPT-4": 'rgb(255, 191, 0)',
+    "GPT-4o": 'rgb(255,140,0)',
+    "Claude-2": "rgb(128, 0, 255)",
+    "Claude-3": "rgb(102,102, 253)",
+    "Claude-3.5": "rgb(0, 128, 255)"}
 
-def dot_plot_results():
+def dot_plot_results(results_dict):
     fig = go.Figure()
+    # colors = ["yellow", "gold", "crimson", "darkblue", "deeppink", "purple", "coral"]
+    for model, prefs in results_dict.items():
+        fig.add_trace(
+            go.Scatter(
+                x=prefs,
+                y=MORAL_VALUES,
+                marker=dict(size=13),
+                mode="lines+markers",
+                name=str(model),
+                line=dict(shape='linear', color=colors[model])
+            )
+        )
     fig.add_trace(
         go.Scatter(
-            x=[72, 67, 73, 80, 76, 79],
+            x=[50]*6,
             y=MORAL_VALUES,
-            marker=dict(color="crimson", size=12),
-            mode="lines+markers",
-            name="GPT-4o",
-            error_x=dict(
-                type='data',
-                symmetric=False,
-                array=[0.1, 0.2, 0.1, 0.1],
-                arrayminus=[0.2, 0.4, 1, 0.2])
+            mode="lines",
+            name="50%",
+            line=dict(shape='linear', color='rgb(255, 0, 0)', dash='dash'),
         )
     )
 
-    fig.add_trace(
-        go.Scatter(
-            x=[92, 94, 100, 107, 112, 114],
-            y=MORAL_VALUES,
-            marker=dict(color="gold", size=12),
-            mode="lines+markers",
-            name="GPT-3.5",
-            error_x=dict(
-                type='data',
-                symmetric=False,
-                array=[0.1, 0.2, 0.1, 0.1],
-                arrayminus=[0.2, 0.4, 1, 0.2])
-        )
-    )
 
     fig.update_layout(
-        title="GPT value preferences",
-        xaxis_title="Percentage of questions chosen",
+        title="Single value preferences", #TODO: change
+        xaxis_title="Answers matching behaviour, %",
         yaxis_title="Moral values",
-        xaxis=dict(
-            showgrid=False,
-        )
+        # xaxis_range=[0,100]
     )
 
     fig.show()
+
+if __name__ == "__main__":
+    # single prefs
+    new_dict = {}
+    for model, pref in single_preferences_dict.items(): # i should be model name
+         new_dict[model] = [int(vals["yes"]*100/1079) for k, vals in pref.items()]
+    print(new_dict)
+    dot_plot_results(new_dict)
+

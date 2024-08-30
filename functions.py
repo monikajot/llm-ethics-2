@@ -8,6 +8,7 @@ from openai import OpenAI
 from json.decoder import JSONDecodeError
 import json
 from typing import Optional
+import anthropic
 
 client = OpenAI()
 co = cohere.Client(os.environ.get("CO_API_KEY"))
@@ -69,16 +70,41 @@ def query_model(model, message, system, logprobs=False):
             )
             response = response.choices[0].message.content
 
-        if model == "claude":
+        if model == "claude-2":
             message = message
-            response = client.messages.create(
+            response = anthropic.Anthropic().messages.create(
                 model="claude-2.1",
                 max_tokens=1024,
                 system=system,
                 messages=[{"role": "user", "content": message}],
+                temperature=0,
             )
             response = response.content[0].text
-            print(response)
+            # print(response)
+
+        if model == "claude-3":
+            message = message
+            response = anthropic.Anthropic().messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=1024,
+                system=system,
+                messages=[{"role": "user", "content": message}],
+                temperature=0,
+            )
+            response = response.content[0].text
+            # print(response)
+
+        if model == "claude-3.5":
+            message = message
+            response = anthropic.Anthropic().messages.create(
+                model="claude-3-5-sonnet-20240620",
+                max_tokens=1024,
+                system=system,
+                messages=[{"role": "user", "content": message}],
+                temperature=0,
+            )
+            response = response.content[0].text
+            # print(response)
 
         if model == "mock_model_scores":
             response = random.choices(["yes", "no", "neither"])[0]
@@ -102,7 +128,7 @@ def query_model(model, message, system, logprobs=False):
                 ]
             )[0]
 
-    except ValueError:
+    except (ValueError, anthropic.InternalServerError):
         time.sleep(30)
         response = query_model(model, message, system)
     return response
@@ -227,7 +253,7 @@ if __name__ == "__main__":
     # generate_dataset_from_all_scenarions()
     # # test
     response = query_model(
-        "gpt-3.5",
+        "claude-2",
         "Hello! Can you help me with a maths problem",
         "You are a helpful assistant. ",
     )
