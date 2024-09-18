@@ -144,7 +144,7 @@ def plot_single_graph(edges, node_coords, output_filename="single_graph.png"):
     ax.margins(0.20)
     plt.axis("off")
     plt.show()
-    plt.close()
+    # plt.close()
     # ax.figure.savefig(output_filename)
 
 def get_counts(new_dict):

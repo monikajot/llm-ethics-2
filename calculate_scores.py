@@ -1,6 +1,6 @@
 import pandas as pd
 
-from mock_results import single_preference_var, pair_preference_var, pair_preference_gpt_4o
+from mock_results import single_preference_var, pair_preference_var, pair_preference_gpt_4o, pair_preference_gpt_35, triple_preference_gpt_35
 import matplotlib.pyplot as plt
 from constants import MORAL_VALUES
 import numpy as np
@@ -23,17 +23,17 @@ def get_single_prefs_means_var():
 
 
 def normalise_pair_prefs(pair_preference_var):
-    first_comb = pair_preference_var[0]
+    first_comb = pair_preference_var
     num = sum(first_comb[list(first_comb.keys())[0]].values())
     # print(num)
     normalised_pair_prefs = []
-    for i, preference_list in enumerate(pair_preference_var):
-        new_dict = {}
-        for comb, results in preference_list.items():
-            new_dict[comb] = {k: int(v * 100 / num) for k, v in results.items()}
-        normalised_pair_prefs.append(new_dict)
+    # for i, preference_list in enumerate(pair_preference_var):
+    new_dict = {}
+    for comb, results in pair_preference_var.items():
+        new_dict[comb] = {k: int(v * 100 / num) for k, v in results.items()}
+    # normalised_pair_prefs.append(new_dict)
     # print(normalised_pair_prefs)
-    return normalised_pair_prefs
+    return new_dict# normalised_pair_prefs[0]
 
 
 def pair_preference_matrix(preference_dict):
@@ -85,18 +85,26 @@ def get_pair_pref_ranking(pair_preferences=pair_preference_var[0]):
     matrix, preference_matrix = pair_preference_matrix(pair_preferences)
     # best_ranking, min_distance = kemeny_young_method(MORAL_VALUES, pair_preference_var[0])
     # print("Kemeny-Young ranking:", best_ranking, min_distance)
-    # matrix["row_sums"] = matrix.apply(sum, axis=1)
-    # matrix["row_sums"] = matrix["row_sums"].apply(int)
+    for col in matrix.columns:
+        matrix[col] = matrix[col].astype(int)
+    new_matrix = matrix
+    new_matrix["row_sums"] = new_matrix.apply(sum, axis=1)
+    new_matrix["row_sums"] = new_matrix["row_sums"].apply(int)
+    new_matrix = new_matrix.sort_values(by="row_sums", ascending=False)
+
+    matrix = new_matrix[MORAL_VALUES]
+
 
     rankings = kemeny_young(preference_matrix)
 
     # total_scores = sorted(zip(MORAL_VALUES, rankings, matrix["row_sums"].values), key=lambda x:x[1])
-    print(matrix)
+    # print(new_matrix)
     print("Kemeny-Young Ranking Scores:", rankings)
     # print(matrix["row_sums"].values)
     sns.heatmap(matrix, cmap="Blues",annot=True, fmt=".3g")
     plt.show()
     return matrix, rankings
 
+
 if __name__ == "__main__":
-    get_pair_pref_ranking(pair_preference_gpt_4o)
+    get_pair_pref_ranking(normalise_pair_prefs(pair_preference_gpt_35))
