@@ -33,13 +33,8 @@ def plot(what):
     print(edges)
     plot_single_graph(edges=edges, node_coords=node_coords)
 
-<<<<<<< HEAD
 
 plot(ordered_pair_prefs_list)
-=======
-plot(['liberty', 'sanctity', 'loyalty', 'care', 'authority', 'fairness'])
-# plot(ordered_total_prefs_list)
->>>>>>> c22fd9004dad46f4af85f6d77864a8ea121fc53e
 # check  monotonic ordering 1 vs 2
 
 # check  monotonic ordering 1 vs all

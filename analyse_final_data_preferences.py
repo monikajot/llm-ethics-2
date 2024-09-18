@@ -1,63 +1,73 @@
+# Install python-ternary and matplotlib if not already installed
+# You can uncomment the following line to install the library
+# !pip install python-ternary matplotlib
+
 import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.patches import Polygon
-from mock_results import x
+import ternary
+import math
 
-foundations = ['authority', 'care', 'fairness', 'liberty', 'loyalty', 'sanctity']
-
-# Assign colors to each foundation
-foundation_colors = {
-    'authority': '#e41a1c',  # red
-    'care': '#377eb8',       # blue
-    'fairness': '#4daf4a',   # green
-    'liberty': '#ff7f00',    # orange
-    'loyalty': '#984ea3',    # purple
-    'sanctity': '#a65628'    # brown
+# Define the data
+triple_preference_gpt_4o = {
+    ('authority', 'care', 'fairness'): {'authority': 143, 'care': 222, 'fairness': 175, 'neither': 0},
+    ('authority', 'care', 'liberty'): {'authority': 157, 'care': 231, 'liberty': 152, 'neither': 0},
+    ('authority', 'care', 'loyalty'): {'authority': 152, 'care': 256, 'loyalty': 132, 'neither': 0},
+    ('authority', 'care', 'sanctity'): {'authority': 142, 'care': 254, 'sanctity': 143, 'neither': 1},
+    ('care', 'fairness', 'liberty'): {'care': 201, 'fairness': 193, 'liberty': 146, 'neither': 0},
+    ('care', 'fairness', 'loyalty'): {'care': 224, 'fairness': 190, 'loyalty': 124, 'neither': 2},
+    ('care', 'fairness', 'sanctity'): {'care': 204, 'fairness': 196, 'sanctity': 140, 'neither': 0},
+    ('care', 'liberty', 'loyalty'): {'care': 249, 'liberty': 141, 'loyalty': 146, 'neither': 4},
+    ('care', 'liberty', 'sanctity'): {'care': 246, 'liberty': 149, 'sanctity': 142, 'neither': 3},
+    ('care', 'loyalty', 'sanctity'): {'care': 259, 'loyalty': 137, 'sanctity': 143, 'neither': 1}
 }
 
-# Compute positions of foundations on the hexagon
-positions = {}
-for i, foundation in enumerate(foundations):
-    angle = 2 * np.pi * i / 6  # in radians
-    x = np.cos(angle)
-    y = np.sin(angle)
-    positions[foundation] = (x, y)
+# Filter the data to include only triples involving 'care'
+filtered_data = {k: v for k, v in triple_preference_gpt_4o.items() if 'care' in k}
 
-# Start plotting
-fig, ax = plt.subplots(figsize=(8, 8))
-ax.set_aspect('equal')
+num_plots = len(filtered_data)
+cols = 3  # Number of columns in the subplot grid
+rows = math.ceil(num_plots / cols)  # Calculate the required number of rows
 
-# Plot the hexagon edges
-hexagon = [positions[foundation] for foundation in foundations]
-hexagon.append(positions[foundations[0]])  # Close the hexagon
-hex_xs, hex_ys = zip(*hexagon)
-ax.plot(hex_xs, hex_ys, 'k-', lw=2)
+# Create a Matplotlib figure with a GridSpec layout
+fig = plt.figure(figsize=(cols * 5, rows * 5))
+gs = fig.add_gridspec(rows, cols, hspace=0.4, wspace=0.4)
 
-# Plot the foundations at the vertices
-for foundation, (x, y) in positions.items():
-    ax.text(x * 1.1, y * 1.1, foundation.capitalize(), fontsize=12, ha='center', va='center')
+# Iterate over each triple and create a ternary subplot
+for idx, (triple, counts) in enumerate(filtered_data.items()):
+    row = idx // cols
+    col = idx % cols
+    ax = fig.add_subplot(gs[row, col])
+    
+    # Create a ternary subplot in the specified position
+    tax = ternary.TernaryAxesSubplot(ax=ax, scale=100)
+    tax.set_title(f"{triple}", fontsize=12)
+    
+    # Remove default Matplotlib axes
+    tax.boundary(linewidth=1.0)
+    tax.gridlines(multiple=20, color="gray", linewidth=0.5)
+    
+    # Extract counts and normalize to sum to 100%
+    a = counts[triple[0]]
+    b = counts[triple[1]]
+    c = counts[triple[2]]
+    total = a + b + c
+    a_norm = a / total * 100
+    b_norm = b / total * 100
+    c_norm = c / total * 100
+    
+    # Plot the normalized point
+    tax.scatter([(a_norm, b_norm, c_norm)], marker='o', color='blue', label='Preference')
+    
+    # Set axis labels (capitalize for aesthetics)
+    tax.left_axis_label(triple[0].capitalize(), fontsize=10, offset=0.14)
+    tax.right_axis_label(triple[1].capitalize(), fontsize=10, offset=0.14)
+    tax.bottom_axis_label(triple[2].capitalize(), fontsize=10, offset=0.14)
+    
+    # Optional: Add a legend if needed
+    # tax.legend()
 
-# Plot triangles for each trio
-for trio, counts in triple_preference_gpt_4o.items():
-    # Get positions
-    coords = [positions[foundation] for foundation in trio]
-    # Determine the most preferred foundation
-    preferred_foundation = max(counts, key=lambda k: counts[k] if k != 'neither' else -1)
-    if preferred_foundation == 'neither':
-        color = '#cccccc'  # Grey for 'neither'
-    else:
-        color = foundation_colors[preferred_foundation]
-    # Create polygon and add to plot
-    triangle = Polygon(coords, closed=True, color=color, alpha=0.5, edgecolor='k')
-    ax.add_patch(triangle)
-    # Compute centroid for labeling
-    centroid = np.mean(coords, axis=0)
-    # Prepare label with counts
-    label = '\n'.join([f"{k.capitalize()}: {v}" for k, v in counts.items() if k != 'neither'])
-    ax.text(centroid[0], centroid[1], label, fontsize=8, ha='center', va='center')
 
-# Remove axes
-ax.axis('off')
+# Set the overall title for the figure
+fig.suptitle("Triple Preferences Involving 'Care'", fontsize=16)
 
-# Show plot
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.show()
