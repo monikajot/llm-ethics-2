@@ -11,10 +11,10 @@ for moral_val, score in gpt_4o_sp.items():
 ordered_single_prefs_list.sort(key=lambda tup: tup[1])
 print(ordered_single_prefs_list)
 #
-# counts = get_counts(create_edges(pair_preferences=pair_preference))
-# ordered_pair_prefs_list = [(moral_val, score) for moral_val, score in counts.items()]
-# ordered_pair_prefs_list.sort(key=lambda tup: tup[1])
-# print(ordered_pair_prefs_list)
+counts = get_counts(create_edges(pair_preferences=pair_preference))
+ordered_pair_prefs_list = [(moral_val, score) for moral_val, score in counts.items()]
+ordered_pair_prefs_list.sort(key=lambda tup: tup[1])
+print(ordered_pair_prefs_list)
 
 
 gpt_4o_tp.pop("neither")
@@ -34,7 +34,7 @@ def plot(what):
     plot_single_graph(edges=edges, node_coords=node_coords)
 
 
-plot(ordered_total_prefs_list)
+plot(ordered_pair_prefs_list)
 # check  monotonic ordering 1 vs 2
 
 # check  monotonic ordering 1 vs all

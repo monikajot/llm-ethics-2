@@ -4,45 +4,140 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import pickle
+import math
 
 from constants import MORAL_VALUES
 from mock_results import pair_preference, pair_preference_gpt_4o, gpt_4o_sp, gpt_4o_tp
 
-OPTIONS = {
-    "font_size": 8,
-    "node_size": 1500,
-    "node_color": "lightblue",
-    "edgecolors": "black",
-    "linewidths": 1.5,
-    "width": 1.5,
+MORAL_VALUE_COLORS = {
+    "authority": "#7b8aab",
+    "care": "#e23557",
+    "fairness": "#f0d43a",
+    "liberty": "#22b2da", 
+    "loyalty": "#9b84b7", 
+    "sanctity": "#a55233",
 }
 
+OPTIONS = {
+    "font_size": 8,
+    "font_weight": 0.5,
+    "node_size": 1500,
+    "node_color": None,       # To be set dynamically
+    "edgecolors": "black",
+    "linewidths": 1.5,
+}
 
 def plot_pair_graph(pair_preferences=pair_preference, output_filename="pair_graph.png"):
     new_dict = create_edges(pair_preferences)
-    # count for each val how many edges are pointing to it
+    # Count for each value how many edges are pointing to it
     counts = get_counts(new_dict)
 
-    sorted_nodes = sorted(counts, key=counts.get)
+    sorted_nodes = list(reversed(sorted(counts, key=counts.get)))
+    print(sorted_nodes)
     node_coords = {
-        node: (3 + (-1) ** i + i * 0.5, i) for i, node in enumerate(sorted_nodes)
+        node: (math.cos(math.radians(60)* (i%6)),4*math.sin(math.radians(60)* (i%6)) ) for i, node in enumerate(sorted_nodes)
     }
+    G = nx.DiGraph()
+    for edge, weight in new_dict.items():
+        G.add_edge(edge[0], edge[1], weight=weight)
 
-    G = nx.DiGraph(new_dict.keys())
-    nx.draw_networkx(G, node_coords, **OPTIONS)
+    # Assign colors based on the MORAL_VALUE_COLORS mapping
+    node_colors = [MORAL_VALUE_COLORS.get(node, "lightblue") for node in G.nodes()]
+
+    # Extract edge weights
+    edge_weights = [G[u][v]['weight'] for u, v in G.edges()]
+
+    # Define scaling parameters for edge widths
+    # Set minimum and maximum widths
+    min_width = 0.5
+    max_width = 3.0
+
+    # Handle the case where all weights are zero
+    if edge_weights:
+        max_weight = max(edge_weights)
+        min_weight_val = min(edge_weights)
+    else:
+        max_weight = 1
+        min_weight_val = 0
+
+    # Avoid division by zero
+    weight_range = max_weight - min_weight_val if max_weight != min_weight_val else 1
+
+    # Scale edge widths
+    widths = [
+        min_width + ( (w - min_weight_val) / weight_range ) * (max_width - min_width)
+        for w in edge_weights
+    ]
+
+    # Update OPTIONS with node colors
+    draw_options = OPTIONS.copy()
+    draw_options["node_color"] = node_colors
+
+    # Draw the graph with dynamic edge widths
+    plt.figure(figsize=(4,6))
+    ax = plt.gca()
+    nx.draw_networkx(
+        G,
+        node_coords,
+        width=widths,
+        ax=ax,
+        **draw_options
+    )
+
+    # Create a legend for the colors
+    create_legend(MORAL_VALUE_COLORS)
 
     # Set margins for the axes so that nodes aren't clipped
     ax = plt.gca()
     ax.margins(0.20)
     plt.axis("off")
     # plt.show()
+    ax.figure.savefig(output_filename, bbox_inches='tight')
     plt.close()
-    ax.figure.savefig(output_filename)
-
 
 def plot_single_graph(edges, node_coords, output_filename="single_graph.png"):
-    G = nx.DiGraph(edges)
-    nx.draw_networkx(G, node_coords, **OPTIONS)
+    G = nx.DiGraph()
+    for edge, weight in edges.items():
+        G.add_edge(edge[0], edge[1], weight=weight)
+
+    # Assign colors based on the MORAL_VALUE_COLORS mapping
+    node_colors = [MORAL_VALUE_COLORS.get(node, "lightblue") for node in G.nodes()]
+
+    # Extract edge weights
+    edge_weights = [G[u][v]['weight'] for u, v in G.edges()]
+
+    # Define scaling parameters for edge widths
+    min_width = 0.5
+    max_width = 5.0
+
+    if edge_weights:
+        max_weight = max(edge_weights)
+        min_weight_val = min(edge_weights)
+    else:
+        max_weight = 1
+        min_weight_val = 0
+
+    weight_range = max_weight - min_weight_val if max_weight != min_weight_val else 1
+
+    widths = [
+        min_width + ( (w - min_weight_val) / weight_range ) * (max_width - min_width)
+        for w in edge_weights
+    ]
+
+    # Update OPTIONS with node colors
+    draw_options = OPTIONS.copy()
+    draw_options["node_color"] = node_colors
+
+    # Draw the graph with dynamic edge widths
+    nx.draw_networkx(
+        G,
+        node_coords,
+        width=widths,
+        **draw_options
+    )
+
+    # Create a legend for the colors
+    create_legend(MORAL_VALUE_COLORS)
 
     # Set margins for the axes so that nodes aren't clipped
     ax = plt.gca()
@@ -52,14 +147,12 @@ def plot_single_graph(edges, node_coords, output_filename="single_graph.png"):
     plt.close()
     # ax.figure.savefig(output_filename)
 
-
 def get_counts(new_dict):
-    # get the number of edges that are pointing to a value
+    # Get the number of edges that are pointing to a value
     counts = {val: 0 for val in MORAL_VALUES}
     for _, key in new_dict.keys():
         counts[key] += 1
     return counts
-
 
 def create_edges(pair_preferences):
     new_dict = {}
@@ -72,7 +165,6 @@ def create_edges(pair_preferences):
             new_dict[(pair[0], pair[1])] = 0
             new_dict[(pair[1], pair[0])] = 0
     return new_dict
-
 
 def plot_pair_heatmaps(
     pair_preferences=pair_preference, output_filename="pair_heatmaps.png"
@@ -104,7 +196,7 @@ def plot_pair_heatmaps(
 
     # Show the plot
     # plt.show()
-    fig.savefig(output_filename)
+    fig.savefig(output_filename, bbox_inches='tight')
     plt.close()
 
 def plot_preference_matrix_heatmap(preference_matrix):
@@ -124,11 +216,21 @@ def plot_preference_matrix_heatmap(preference_matrix):
 
     plt.show()
 
-if __name__ == "__main__":
-    # with open(f"PREFERENCES.pkl", "rb") as f:
-    #     preferences = pickle.load(f)
-    # print(preferences["pair_preference"][0])
-    # plot_preference_matrix_heatmap()
-    # plot_pair_graph(pair_preference_gpt_4o)
+def create_legend(color_mapping):
+    # Create custom legend handles
+    from matplotlib.patches import Patch
 
-    plot_single_graph(edges)
+    legend_elements = [
+        Patch(facecolor=color, edgecolor="black", label=label.capitalize())
+        for label, color in color_mapping.items()
+    ]
+
+    plt.legend(
+        handles=legend_elements,
+        title="Moral Foundations",
+        loc="upper left",
+        bbox_to_anchor=(1, 1),
+    )
+
+if __name__ == "__main__":
+    plot_pair_graph(pair_preference_gpt_4o)
