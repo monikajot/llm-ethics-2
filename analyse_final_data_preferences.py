@@ -1,73 +1,73 @@
-# Install python-ternary and matplotlib if not already installed
-# You can uncomment the following line to install the library
-# !pip install python-ternary matplotlib
-
 import matplotlib.pyplot as plt
-import ternary
 import math
 
-# Define the data
+# Data provided
 triple_preference_gpt_4o = {
     ('authority', 'care', 'fairness'): {'authority': 143, 'care': 222, 'fairness': 175, 'neither': 0},
     ('authority', 'care', 'liberty'): {'authority': 157, 'care': 231, 'liberty': 152, 'neither': 0},
     ('authority', 'care', 'loyalty'): {'authority': 152, 'care': 256, 'loyalty': 132, 'neither': 0},
     ('authority', 'care', 'sanctity'): {'authority': 142, 'care': 254, 'sanctity': 143, 'neither': 1},
-    ('care', 'fairness', 'liberty'): {'care': 201, 'fairness': 193, 'liberty': 146, 'neither': 0},
-    ('care', 'fairness', 'loyalty'): {'care': 224, 'fairness': 190, 'loyalty': 124, 'neither': 2},
-    ('care', 'fairness', 'sanctity'): {'care': 204, 'fairness': 196, 'sanctity': 140, 'neither': 0},
-    ('care', 'liberty', 'loyalty'): {'care': 249, 'liberty': 141, 'loyalty': 146, 'neither': 4},
-    ('care', 'liberty', 'sanctity'): {'care': 246, 'liberty': 149, 'sanctity': 142, 'neither': 3},
-    ('care', 'loyalty', 'sanctity'): {'care': 259, 'loyalty': 137, 'sanctity': 143, 'neither': 1}
+    ('fairness', 'care', 'liberty'): {'fairness': 201, 'care': 193, 'liberty': 146, 'neither': 0},
+    ('fairness', 'care', 'loyalty'): {'fairness': 224, 'care': 190, 'loyalty': 124, 'neither': 2},
+    ('fairness', 'care', 'sanctity'): {'fairness': 204, 'care': 196, 'sanctity': 140, 'neither': 0},
+    ('liberty', 'care', 'loyalty'): {'liberty': 249, 'care': 141, 'loyalty': 146, 'neither': 4},
+    ('liberty', 'care', 'sanctity'): {'liberty': 246, 'care': 149, 'sanctity': 142, 'neither': 3},
+    ('loyalty', 'care', 'sanctity'): {'loyalty': 259, 'care': 137, 'sanctity': 143, 'neither': 1}
 }
 
-# Filter the data to include only triples involving 'care'
-filtered_data = {k: v for k, v in triple_preference_gpt_4o.items() if 'care' in k}
+data = triple_preference_gpt_4o.copy()
 
-num_plots = len(filtered_data)
-cols = 3  # Number of columns in the subplot grid
-rows = math.ceil(num_plots / cols)  # Calculate the required number of rows
+# Define the sequence of components around the pentagon
+components_sequence = ['authority', 'fairness', 'liberty', 'loyalty', 'sanctity']
 
-# Create a Matplotlib figure with a GridSpec layout
-fig = plt.figure(figsize=(cols * 5, rows * 5))
-gs = fig.add_gridspec(rows, cols, hspace=0.4, wspace=0.4)
-
-# Iterate over each triple and create a ternary subplot
-for idx, (triple, counts) in enumerate(filtered_data.items()):
-    row = idx // cols
-    col = idx % cols
-    ax = fig.add_subplot(gs[row, col])
-    
-    # Create a ternary subplot in the specified position
-    tax = ternary.TernaryAxesSubplot(ax=ax, scale=100)
-    tax.set_title(f"{triple}", fontsize=12)
-    
-    # Remove default Matplotlib axes
-    tax.boundary(linewidth=1.0)
-    tax.gridlines(multiple=20, color="gray", linewidth=0.5)
-    
-    # Extract counts and normalize to sum to 100%
-    a = counts[triple[0]]
-    b = counts[triple[1]]
-    c = counts[triple[2]]
+def ternary_to_cartesian(values, components):
+    # components is a list of the three components in order [a, b, c]
+    a = values[components[0]]
+    b = values[components[1]]
+    c = values[components[2]]
+    # Normalize the values (ignore 'neither')
     total = a + b + c
-    a_norm = a / total * 100
-    b_norm = b / total * 100
-    c_norm = c / total * 100
-    
-    # Plot the normalized point
-    tax.scatter([(a_norm, b_norm, c_norm)], marker='o', color='blue', label='Preference')
-    
-    # Set axis labels (capitalize for aesthetics)
-    tax.left_axis_label(triple[0].capitalize(), fontsize=10, offset=0.14)
-    tax.right_axis_label(triple[1].capitalize(), fontsize=10, offset=0.14)
-    tax.bottom_axis_label(triple[2].capitalize(), fontsize=10, offset=0.14)
-    
-    # Optional: Add a legend if needed
-    # tax.legend()
+    a /= total
+    b /= total
+    c /= total
+    # Calculate the 2D Cartesian coordinates in a ternary plot
+    x = 0.5 * (2 * b + c)
+    y = (math.sqrt(3) / 2) * c
+    return x, y
 
+def rotate_coordinates(x, y, theta):
+    # Apply rotation matrix
+    x_rotated = x * math.cos(theta) - y * math.sin(theta)
+    y_rotated = x * math.sin(theta) + y * math.cos(theta)
+    return x_rotated, y_rotated
 
-# Set the overall title for the figure
-fig.suptitle("Triple Preferences Involving 'Care'", fontsize=16)
+# Plot 'care' at center
+plt.scatter([0], [0], label='care')
 
-plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+initial_angle = -90  # Start from the top
+num_components = len(components_sequence)
+for k in range(num_components):
+    primary = components_sequence[k]
+    secondary = components_sequence[(k + 1) % num_components]
+    # Find the key in 'data' that contains 'care', 'primary', and 'secondary'
+    key_candidates = [key for key in data.keys() if set(key) == set([primary, secondary, 'care'])]
+    if not key_candidates:
+        print(f"No data for combination ({primary}, {secondary}, 'care')")
+        continue
+    key = key_candidates[0]
+    val = data[key]
+    # Components order is [primary, secondary, 'care']
+    components = [primary, secondary, 'care']
+    x, y = ternary_to_cartesian(val, components)
+    # Rotate coordinates
+    theta = math.radians(initial_angle + k * 72)
+    x_rot, y_rot = rotate_coordinates(x, y, theta)
+    plt.scatter([x_rot], [y_rot], label=f"({primary}, {secondary})")
+    # Plot the vertex for 'primary'
+    vertex_x, vertex_y = rotate_coordinates(0, 1, theta)  # (0, 1) is at the top
+    plt.scatter([vertex_x], [vertex_y], label=primary)
+    # Remove the key from data
+    del data[key]
+
+plt.legend()
 plt.show()

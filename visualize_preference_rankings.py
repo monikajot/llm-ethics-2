@@ -10,12 +10,12 @@ from constants import MORAL_VALUES
 from mock_results import pair_preference, pair_preference_gpt_4o, gpt_4o_sp, gpt_4o_tp
 
 MORAL_VALUE_COLORS = {
-    "authority": "#7b8aab",
-    "care": "#e23557",
-    "fairness": "#f0d43a",
-    "liberty": "#22b2da", 
-    "loyalty": "#9b84b7", 
-    "sanctity": "#a55233",
+    "authority": "#7293CB",
+    "care": "#E1974C",
+    "fairness": "#84BA5B",
+    "liberty": "#D35E60",
+    "loyalty": "#808585",
+    "sanctity": "#9067A7",
 }
 
 OPTIONS = {
@@ -27,7 +27,7 @@ OPTIONS = {
     "linewidths": 1.5,
 }
 
-def plot_pair_graph(pair_preferences=pair_preference, output_filename="pair_graph.png"):
+def plot_pair_graph(pair_preferences=pair_preference, output_filename="figures/pair_graph.png"):
     new_dict = create_edges(pair_preferences)
     # Count for each value how many edges are pointing to it
     counts = get_counts(new_dict)

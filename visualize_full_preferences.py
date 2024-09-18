@@ -14,6 +14,13 @@ colors = {
     "Gemini-1.5-Flash": "rgb(100, 50, 50)"
 }
 
+def rgb_to_rgba(rgb_str, alpha=0.5):
+    """
+    Convert an RGB string to RGBA with the specified alpha.
+    Example: 'rgb(236,36,0)' -> 'rgba(236,36,0,0.5)'
+    """
+    return rgb_str.replace('rgb(', 'rgba(').replace(')', f',{alpha})')
+
 def dot_plot_results(results_dict, error_dict, filename):
     fig = go.Figure()
     for model, prefs in results_dict.items():
@@ -29,7 +36,8 @@ def dot_plot_results(results_dict, error_dict, filename):
                 error_x=dict(
                     type='data',
                     array=errors,
-                    visible=True
+                    visible=True,
+                    color=rgb_to_rgba(colors[model], alpha=0.5)  # Set error bar color with alpha
                 )
             )
         )
@@ -39,7 +47,7 @@ def dot_plot_results(results_dict, error_dict, filename):
             y=MORAL_VALUES,
             mode="lines",
             name="50%",
-            line=dict(shape='linear', color='rgb(255, 0, 0)', dash='dash'),
+            line=dict(shape='linear', color='rgba(255, 0, 0, 1)', dash='dash'),
         )
     )
 
@@ -53,7 +61,7 @@ def dot_plot_results(results_dict, error_dict, filename):
 
 
 if __name__ == "__main__":
-    # single prefs
+    # Initialize dictionaries to hold preferences and errors
     new_dict = {}
     error_dict = {}
 
@@ -68,6 +76,7 @@ if __name__ == "__main__":
             errors.append(error)
         new_dict[model] = prefs
         error_dict[model] = errors
+
     print(new_dict)
     filename = "figures/single_pref.png"
     dot_plot_results(new_dict, error_dict, filename)
