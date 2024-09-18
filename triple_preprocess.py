@@ -3,9 +3,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from mock_results import triple_preference
+from mock_results import triple_preference, triple_preference_gpt_35
 from constants import MORAL_VALUES
-
+from calculate_scores import kemeny_young
 
 def tuple_to_pairwise_matrix(triples):
     # Get all unique items and map them to indices
@@ -37,4 +37,32 @@ def triples_to_preference_matrix(triple_preference):
     df = pd.DataFrame(pairwise_matrix, columns=MORAL_VALUES, index=MORAL_VALUES)
     return df
 
+def get_triple_pref_ranking(preference_matrix):
+    # best_ranking, min_distance = kemeny_young_method(MORAL_VALUES, pair_preference_var[0])
+    # print("Kemeny-Young ranking:", best_ranking, min_distance)
+
+    matrix = pd.DataFrame(data=preference_matrix, columns=MORAL_VALUES, index=MORAL_VALUES)
+    matrix["row_sums"] = matrix.apply(sum, axis=1)
+    matrix["row_sums"] = matrix["row_sums"].apply(int)
+    matrix = matrix.sort_values(by="row_sums", ascending=False)
+
+    matrix = matrix[MORAL_VALUES]
+    for col in matrix.columns:
+        matrix[col] = matrix[col].astype(int)
+        matrix[col] = matrix[col].apply(lambda val: val*100/1079/5)
+    rankings = kemeny_young(preference_matrix)
+
+    # total_scores = sorted(zip(MORAL_VALUES, rankings, matrix["row_sums"].values), key=lambda x:x[1])
+    print(matrix)
+    print("Kemeny-Young Ranking Scores:", rankings)
+    # print(matrix["row_sums"].values)
+    sns.heatmap(matrix, cmap="Blues",annot=True, fmt=".0f")
+    plt.show()
+    return rankings
+
+if __name__ == "__main__":
+    matrix = triples_to_preference_matrix(triple_preference_gpt_35)
+    print(matrix)
+    x= get_triple_pref_ranking(matrix.to_numpy())
+    # print([MORAL_VALUES[int(i)] for i in x ])
 

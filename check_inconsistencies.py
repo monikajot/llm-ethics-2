@@ -26,15 +26,15 @@ print(ordered_total_prefs_list)
 
 
 def plot(what):
-    nodes = [x for x, _ in what]
+    nodes = [x for x in what]
 
     edges = [(nodes[i], nodes[i + 1]) for i in range(len(nodes) - 1)]
     node_coords = {node: (0, 10 * i) for i, node in enumerate(nodes)}
     print(edges)
     plot_single_graph(edges=edges, node_coords=node_coords)
 
-
-plot(ordered_total_prefs_list)
+plot(['liberty', 'sanctity', 'loyalty', 'care', 'authority', 'fairness'])
+# plot(ordered_total_prefs_list)
 # check  monotonic ordering 1 vs 2
 
 # check  monotonic ordering 1 vs all
